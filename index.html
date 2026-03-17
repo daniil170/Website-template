@@ -25,164 +25,175 @@
                     <img src="assets/images/logo.png" alt="Logo" class="logo">
                 </div>
                 <div class="header-title-info">
-                    <h3 class="header-title">
-                        Lumiere
-                    </h3>
+                    <h3 class="header-title">Lumiere</h3>
                 </div>
                 <div class="header-subtitle-info">
-                    <blockquote class="subtitle">
-                        Modern Italian Kitchen
-                    </blockquote>
+                    <blockquote class="subtitle" data-i18n="subtitle">Modern Italian Kitchen</blockquote>
                 </div>
                 <div class="header-actions">
-                    <button class="lang-btn active">EN</button>
-                    <button class="lang-btn">RU</button>
-                    <button class="lang-btn">KZ</button>
+                    <button class="lang-btn" onclick="switchLanguage('en', this)">EN</button>
+                    <button class="lang-btn" onclick="switchLanguage('ru', this)">RU</button>
+                    <button class="lang-btn" onclick="switchLanguage('kz', this)">KZ</button>
                 </div>
             </div>
         </div>
     </header>
+
     <nav class="menu-nav">
-        <a href="#pizza">Pizza</a>
-        <a href="#main-dishes">Main-dishes</a>
-        <a href="#salads">Salads</a>
-        <a href="#desserts">Desserts</a>
-        <a href="#drinks">Drinks</a>
+        <a href="#pizza" data-i18n="nav.pizza">Pizza</a>
+        <a href="#main-dishes" data-i18n="nav.mainDishes">Main Dishes</a>
+        <a href="#salads" data-i18n="nav.salads">Salads</a>
+        <a href="#desserts" data-i18n="nav.desserts">Desserts</a>
+        <a href="#drinks" data-i18n="nav.drinks">Drinks</a>
     </nav>
+
     <main class="menu">
+
+        <!-- MAIN DISHES -->
         <section id="main-dishes" class="menu-category">
-            <h2 class="category-title">Main Dishes</h2>
+            <h2 class="category-title" data-i18n="categories.mainDishes">Main Dishes</h2>
             <div class="dishes">
+
                 <div class="dish">
                     <img src="assets/images/pasta.png" alt="Pasta">
                     <div class="dish-info">
-                        <h3 class="dish-name">Pasta Carbonara</h3>
-                        <p class="dish-desc">Bacon, cream, parmesan</p>
+                        <h3 class="dish-name" data-i18n="dishes.carbonara.name">Pasta Carbonara</h3>
+                        <p class="dish-desc" data-i18n="dishes.carbonara.desc">Bacon, cream, parmesan</p>
                         <span class="dish-price">3500 ₸</span>
                     </div>
                 </div>
+
                 <div class="dish">
-                    <img src="assets/images/prawns.png" alt="Pasta">
+                    <img src="assets/images/prawns.png" alt="Prawns">
                     <div class="dish-info">
-                        <h3 class="dish-name">Prawns with sauce</h3>
-                        <p class="dish-desc">Garlic, spagetti, pepper</p>
+                        <h3 class="dish-name" data-i18n="dishes.prawns.name">Prawns with sauce</h3>
+                        <p class="dish-desc" data-i18n="dishes.prawns.desc">Garlic, spaghetti, pepper</p>
                         <span class="dish-price">4000 ₸</span>
                     </div>
                 </div>
+
                 <div class="dish">
-                    <img src="assets/images/medaliony.png" alt="Pasta">
+                    <img src="assets/images/medaliony.png" alt="Medallions">
                     <div class="dish-info">
-                        <h3 class="dish-name">Pasta with medallions</h3>
-                        <p class="dish-desc">Medallions, spagetti, pepper</p>
+                        <h3 class="dish-name" data-i18n="dishes.medallions.name">Pasta with medallions</h3>
+                        <p class="dish-desc" data-i18n="dishes.medallions.desc">Medallions, spaghetti, pepper</p>
                         <span class="dish-price">3900 ₸</span>
                     </div>
                 </div>
+
                 <div class="dish">
-                    <img src="assets/images/pasta with mashrooms.png" alt="Pasta">
+                    <img src="assets/images/pasta with mashrooms.png" alt="Pasta with mushrooms">
                     <div class="dish-info">
-                        <h3 class="dish-name">Pasta with mushrooms</h3>
-                        <p class="dish-desc">Mushrooms, spagetti, pepper</p>
+                        <h3 class="dish-name" data-i18n="dishes.pastaMushrooms.name">Pasta with mushrooms</h3>
+                        <p class="dish-desc" data-i18n="dishes.pastaMushrooms.desc">Mushrooms, spaghetti, pepper</p>
                         <span class="dish-price">3000 ₸</span>
                     </div>
                 </div>
+
             </div>
         </section>
-        <section id="pizza" class="menu-category">
-            <h2 class="category-title">Pizza</h2>
 
+        <!-- PIZZA -->
+        <section id="pizza" class="menu-category">
+            <h2 class="category-title" data-i18n="categories.pizza">Pizza</h2>
             <div class="dishes">
 
                 <div class="dish">
-                    <img src="assets/images/margherita.png" alt="">
+                    <img src="assets/images/margherita.png" alt="Margherita">
                     <div class="dish-info">
-                        <h3 class="dish-name">Pizza Margherita</h3>
-                        <p class="dish-desc">Tomato sauce, mozzarella, basil</p>
+                        <h3 class="dish-name" data-i18n="dishes.margherita.name">Pizza Margherita</h3>
+                        <p class="dish-desc" data-i18n="dishes.margherita.desc">Tomato sauce, mozzarella, basil</p>
                         <span class="dish-price">3200 ₸</span>
                     </div>
                 </div>
 
                 <div class="dish">
-                    <img src="assets/images/pepperoni.png" alt="">
+                    <img src="assets/images/pepperoni.png" alt="Pepperoni">
                     <div class="dish-info">
-                        <h3 class="dish-name">Pizza Pepperoni</h3>
-                        <p class="dish-desc">Tomato sauce, mozzarella, pepperoni</p>
+                        <h3 class="dish-name" data-i18n="dishes.pepperoni.name">Pizza Pepperoni</h3>
+                        <p class="dish-desc" data-i18n="dishes.pepperoni.desc">Tomato sauce, mozzarella, pepperoni</p>
                         <span class="dish-price">3600 ₸</span>
                     </div>
                 </div>
 
                 <div class="dish">
-                    <img src="assets/images/pizza with mashrooms.png" alt="">
+                    <img src="assets/images/pizza with mashrooms.png" alt="Pizza with mushrooms">
                     <div class="dish-info">
-                        <h3 class="dish-name">Pizza with mushrooms</h3>
-                        <p class="dish-desc">Tomato sauce, mozzarella, mushrooms</p>
+                        <h3 class="dish-name" data-i18n="dishes.pizzaMushrooms.name">Pizza with mushrooms</h3>
+                        <p class="dish-desc" data-i18n="dishes.pizzaMushrooms.desc">Tomato sauce, mozzarella, mushrooms
+                        </p>
                         <span class="dish-price">3500 ₸</span>
                     </div>
                 </div>
 
                 <div class="dish">
-                    <img src="assets/images/pizza with parmezano.png" alt="">
+                    <img src="assets/images/pizza with parmezano.png" alt="Pizza Parmezano">
                     <div class="dish-info">
-                        <h3 class="dish-name">Pizza with parmezano</h3>
-                        <p class="dish-desc">Tomato sauce, mozzarella, mushrooms</p>
+                        <h3 class="dish-name" data-i18n="dishes.pizzaParmezano.name">Pizza with parmezano</h3>
+                        <p class="dish-desc" data-i18n="dishes.pizzaParmezano.desc">Tomato sauce, mozzarella, parmesan
+                        </p>
                         <span class="dish-price">5000 ₸</span>
                     </div>
                 </div>
 
             </div>
         </section>
-        <section id="salads" class="menu-category">
-            <h2 class="category-title">Salads</h2>
 
+        <!-- SALADS -->
+        <section id="salads" class="menu-category">
+            <h2 class="category-title" data-i18n="categories.salads">Salads</h2>
             <div class="dishes">
 
                 <div class="dish">
-                    <img src="assets/images/caesar.png" alt="">
+                    <img src="assets/images/caesar.png" alt="Caesar">
                     <div class="dish-info">
-                        <h3 class="dish-name">Caesar Salad</h3>
-                        <p class="dish-desc">Chicken, parmesan, romaine, caesar sauce</p>
+                        <h3 class="dish-name" data-i18n="dishes.caesar.name">Caesar Salad</h3>
+                        <p class="dish-desc" data-i18n="dishes.caesar.desc">Chicken, parmesan, romaine, caesar sauce</p>
                         <span class="dish-price">2800 ₸</span>
                     </div>
                 </div>
 
                 <div class="dish">
-                    <img src="assets/images/caprese.png" alt="">
+                    <img src="assets/images/caprese.png" alt="Caprese">
                     <div class="dish-info">
-                        <h3 class="dish-name">Caprese</h3>
-                        <p class="dish-desc">Tomatoes, mozzarella, basil, olive oil</p>
+                        <h3 class="dish-name" data-i18n="dishes.caprese.name">Caprese</h3>
+                        <p class="dish-desc" data-i18n="dishes.caprese.desc">Tomatoes, mozzarella, basil, olive oil</p>
                         <span class="dish-price">2600 ₸</span>
                     </div>
                 </div>
 
                 <div class="dish">
-                    <img src="assets/images/panzanella.png" alt="">
+                    <img src="assets/images/panzanella.png" alt="Panzanella">
                     <div class="dish-info">
-                        <h3 class="dish-name">Panzanella</h3>
-                        <p class="dish-desc">Tomatoes, cucumbers, red onion, olive oil</p>
+                        <h3 class="dish-name" data-i18n="dishes.panzanella.name">Panzanella</h3>
+                        <p class="dish-desc" data-i18n="dishes.panzanella.desc">Tomatoes, cucumbers, red onion, olive
+                            oil</p>
                         <span class="dish-price">3000 ₸</span>
                     </div>
                 </div>
 
                 <div class="dish">
-                    <img src="assets/images/panzanella.png" alt="">
+                    <img src="assets/images/panzanella.png" alt="Di rucola">
                     <div class="dish-info">
-                        <h3 class="dish-name">Di rucola</h3>
-                        <p class="dish-desc">Tomatoes, rucola, olive oil</p>
+                        <h3 class="dish-name" data-i18n="dishes.rucola.name">Di rucola</h3>
+                        <p class="dish-desc" data-i18n="dishes.rucola.desc">Tomatoes, rucola, olive oil</p>
                         <span class="dish-price">3200 ₸</span>
                     </div>
                 </div>
 
             </div>
         </section>
-        <section id="desserts" class="menu-category">
-            <h2 class="category-title">Desserts</h2>
 
+        <!-- DESSERTS -->
+        <section id="desserts" class="menu-category">
+            <h2 class="category-title" data-i18n="categories.desserts">Desserts</h2>
             <div class="dishes">
 
                 <div class="dish">
                     <img src="assets/images/tiramisu.png" alt="Tiramisu">
                     <div class="dish-info">
-                        <h3 class="dish-name">Tiramisu</h3>
-                        <p class="dish-desc">Mascarpone cream, coffee, cocoa</p>
+                        <h3 class="dish-name" data-i18n="dishes.tiramisu.name">Tiramisu</h3>
+                        <p class="dish-desc" data-i18n="dishes.tiramisu.desc">Mascarpone cream, coffee, cocoa</p>
                         <span class="dish-price">2800 ₸</span>
                     </div>
                 </div>
@@ -190,8 +201,8 @@
                 <div class="dish">
                     <img src="assets/images/panna-cotta.png" alt="Panna Cotta">
                     <div class="dish-info">
-                        <h3 class="dish-name">Panna Cotta</h3>
-                        <p class="dish-desc">Cream dessert with berry sauce</p>
+                        <h3 class="dish-name" data-i18n="dishes.pannaCotta.name">Panna Cotta</h3>
+                        <p class="dish-desc" data-i18n="dishes.pannaCotta.desc">Cream dessert with berry sauce</p>
                         <span class="dish-price">2500 ₸</span>
                     </div>
                 </div>
@@ -199,24 +210,25 @@
                 <div class="dish">
                     <img src="assets/images/gelato.png" alt="Gelato">
                     <div class="dish-info">
-                        <h3 class="dish-name">Gelato</h3>
-                        <p class="dish-desc">Italian ice cream, various flavors</p>
+                        <h3 class="dish-name" data-i18n="dishes.gelato.name">Gelato</h3>
+                        <p class="dish-desc" data-i18n="dishes.gelato.desc">Italian ice cream, various flavors</p>
                         <span class="dish-price">2000 ₸</span>
                     </div>
                 </div>
 
             </div>
         </section>
-        <section id="drinks" class="menu-category">
-            <h2 class="category-title">Drinks</h2>
 
+        <!-- DRINKS -->
+        <section id="drinks" class="menu-category">
+            <h2 class="category-title" data-i18n="categories.drinks">Drinks</h2>
             <div class="dishes">
 
                 <div class="dish">
                     <img src="assets/images/espresso.png" alt="Espresso">
                     <div class="dish-info">
-                        <h3 class="dish-name">Espresso</h3>
-                        <p class="dish-desc">Classic Italian coffee</p>
+                        <h3 class="dish-name" data-i18n="dishes.espresso.name">Espresso</h3>
+                        <p class="dish-desc" data-i18n="dishes.espresso.desc">Classic Italian coffee</p>
                         <span class="dish-price">900 ₸</span>
                     </div>
                 </div>
@@ -224,8 +236,8 @@
                 <div class="dish">
                     <img src="assets/images/cappuccino.png" alt="Cappuccino">
                     <div class="dish-info">
-                        <h3 class="dish-name">Cappuccino</h3>
-                        <p class="dish-desc">Espresso with milk foam</p>
+                        <h3 class="dish-name" data-i18n="dishes.cappuccino.name">Cappuccino</h3>
+                        <p class="dish-desc" data-i18n="dishes.cappuccino.desc">Espresso with milk foam</p>
                         <span class="dish-price">1500 ₸</span>
                     </div>
                 </div>
@@ -233,8 +245,8 @@
                 <div class="dish">
                     <img src="assets/images/lemonade.png" alt="Lemonade">
                     <div class="dish-info">
-                        <h3 class="dish-name">Lemonade</h3>
-                        <p class="dish-desc">Fresh homemade lemonade</p>
+                        <h3 class="dish-name" data-i18n="dishes.lemonade.name">Lemonade</h3>
+                        <p class="dish-desc" data-i18n="dishes.lemonade.desc">Fresh homemade lemonade</p>
                         <span class="dish-price">1800 ₸</span>
                     </div>
                 </div>
@@ -242,35 +254,43 @@
                 <div class="dish">
                     <img src="assets/images/orange-juice.png" alt="Orange Juice">
                     <div class="dish-info">
-                        <h3 class="dish-name">Fresh Orange Juice</h3>
-                        <p class="dish-desc">Freshly squeezed orange juice</p>
+                        <h3 class="dish-name" data-i18n="dishes.orangeJuice.name">Fresh Orange Juice</h3>
+                        <p class="dish-desc" data-i18n="dishes.orangeJuice.desc">Freshly squeezed orange juice</p>
                         <span class="dish-price">2000 ₸</span>
                     </div>
                 </div>
 
             </div>
         </section>
+
     </main>
+
     <footer class="footer">
         <div class="container">
-
             <h3 class="footer-title">Lumiere</h3>
-
-            <p class="footer-address">
-                Almaty, Kazakhstan
-            </p>
-
+            <p class="footer-address" data-i18n="footer.address">Almaty, Kazakhstan</p>
             <div class="footer-contact">
                 <a href="tel:+77000000000" class="footer-link">+7 700 000 00 00</a>
                 <a href="#" class="footer-link">Instagram</a>
             </div>
-
-            <p class="footer-copy">
-                © 2026 Lumiere Restaurant
-            </p>
-
+            <p class="footer-copy" data-i18n="footer.copy">© 2026 Lumiere Restaurant</p>
         </div>
     </footer>
+
+    <div class="welcome-overlay" id="welcomeOverlay">
+        <div class="welcome-modal">
+            <h2 id="welcome-title">Добро пожаловать</h2>
+            <p id="welcome-subtitle">Выберите язык</p>
+            <div class="welcome-lang-btns">
+                <button onclick="selectLang('en')">EN</button>
+                <button onclick="selectLang('ru')">RU</button>
+                <button onclick="selectLang('kz')">KZ</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/index.js"></script>
+
 </body>
 
 </html>
