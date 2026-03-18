@@ -1,8 +1,14 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
 import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-analytics.js";
-import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  where,
+} from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
-// ---------- Firebase ----------
+// ---------- Firebase Config ----------
 const firebaseConfig = {
   apiKey: "AIzaSyAUIQqsfAiDxYBExYGXW828-6DFDprNfnQ",
   authDomain: "menu-template-5b0eb.firebaseapp.com",
@@ -10,167 +16,197 @@ const firebaseConfig = {
   storageBucket: "menu-template-5b0eb.firebasestorage.app",
   messagingSenderId: "371601105943",
   appId: "1:371601105943:web:daa1114eea08ee8ecc6852",
-  measurementId: "G-HPZ4L6058G"
+  measurementId: "G-HPZ4L6058G",
 };
 
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 const db = getFirestore(app);
 
+// ---------- Translations (Статика) ----------
 const translations = {
-  en: {
-    subtitle: "Modern Italian Kitchen",
-    categories: {
-      "main-dishes": "Main Dishes",
-      pizza: "Pizza",
-      salads: "Salads",
-      desserts: "Desserts",
-      drinks: "Drinks"
-    },
-    footer: {
-      address: "Almaty, Kazakhstan",
-      copy: "© 2026 Lumiere Restaurant"
-    }
-  },
   ru: {
     subtitle: "Современная итальянская кухня",
-    categories: {
-      "main-dishes": "Основные блюда",
-      pizza: "Пицца",
-      salads: "Салаты",
-      desserts: "Десерты",
-      drinks: "Напитки"
-    },
     footer: {
       address: "Алматы, Казахстан",
-      copy: "© 2026 Ресторан Lumiere"
-    }
+      copy: "© 2026 Ресторан Lumiere",
+    },
+  },
+  en: {
+    subtitle: "Modern Italian Kitchen",
+    footer: {
+      address: "Almaty, Kazakhstan",
+      copy: "© 2026 Lumiere Restaurant",
+    },
   },
   kz: {
     subtitle: "Заманауи итальян асханасы",
-    categories: {
-      "main-dishes": "Негізгі тағамдар",
-      pizza: "Пицца",
-      salads: "Салаттар",
-      desserts: "Десерттер",
-      drinks: "Сусындар"
-    },
     footer: {
       address: "Алматы, Қазақстан",
-      copy: "© 2026 Lumiere мейрамханасы"
-    }
-  }
+      copy: "© 2026 Lumiere мейрамханасы",
+    },
+  },
 };
 
-// ---------- Переменная текущего языка ----------
-let currentLang = "ru";
+let currentLang = localStorage.getItem("language") || "ru";
 
+// ---------- 1. Функция перевода статических текстов ----------
+function applyTranslations() {
+  const langData = translations[currentLang];
+
+  const subtitle = document.querySelector("[data-i18n='subtitle']");
+  if (subtitle) subtitle.textContent = langData.subtitle;
+
+  const address = document.querySelector("[data-i18n='footer.address']");
+  if (address) address.textContent = langData.footer.address;
+
+  const copy = document.querySelector("[data-i18n='footer.copy']");
+  if (copy) copy.textContent = langData.footer.copy;
+}
+
+// ---------- 2. Загрузка блюд из Firebase ----------
+async function loadMenu(categoryName) {
+  try {
+    const dishesRef = collection(db, "restaurants", "lumiere", "dishes");
+    const q = query(dishesRef, where("category", "==", categoryName));
+    const menuSnapshot = await getDocs(q);
+    return menuSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  } catch (error) {
+    console.error("Ошибка при загрузке блюд:", error);
+    return [];
+  }
+}
+
+// ---------- 3. Отрисовка карточек блюд (С АНИМАЦИЕЙ) ----------
+function renderMenu(categoryRuName, containerSelector) {
+  const container = document.querySelector(containerSelector);
+  if (!container) return;
+
+  loadMenu(categoryRuName).then((items) => {
+    container.innerHTML = "";
+    if (items.length === 0) {
+      container.innerHTML = `<p style="color: gray; font-style: italic; text-align: center; width: 100%;">Пока пусто...</p>`;
+      return;
+    }
+
+    // Создаем "наблюдателя" для плавного появления
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry, index) => {
+          if (entry.isIntersecting) {
+            // Добавляем небольшую задержку для эффекта "лесенки"
+            setTimeout(() => {
+              entry.target.classList.add("visible");
+            }, index * 100);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1 },
+    );
+
+    items.forEach((item) => {
+      const name =
+        typeof item.name === "object"
+          ? item.name[currentLang] || item.name["ru"]
+          : item.name;
+      const desc =
+        typeof item.description === "object"
+          ? item.description[currentLang] || item.description["ru"]
+          : item.description;
+      const price = item.price || "---";
+      const img = item.img || "https://via.placeholder.com/150";
+
+      const dishElement = document.createElement("div");
+      dishElement.className = "dish"; // Класс для CSS
+      dishElement.innerHTML = `
+        <img src="${img}" alt="${name}">
+        <div class="dish-info">
+          <h3 class="dish-name">${name}</h3>
+          <p class="dish-desc">${desc}</p>
+          <span class="dish-price">${price} ₸</span>
+        </div>
+      `;
+      container.appendChild(dishElement);
+      observer.observe(dishElement); // Начинаем следить за элементом
+    });
+  });
+}
+
+// ---------- 4. Динамическая сборка всего меню и навигации ----------
+async function initDynamicMenu() {
+  const nav = document.getElementById("dynamic-nav");
+  const container = document.getElementById("menu-container");
+  if (!nav || !container) return;
+
+  try {
+    const catSnapshot = await getDocs(
+      collection(db, "restaurants", "lumiere", "categories"),
+    );
+
+    nav.innerHTML = "";
+    container.innerHTML = "";
+
+    catSnapshot.forEach((catDoc) => {
+      const categoryData = catDoc.data();
+      const categoryId = catDoc.id;
+
+      const categoryDisplayName =
+        typeof categoryData.name === "object"
+          ? categoryData.name[currentLang] || categoryData.name["ru"]
+          : categoryData.name;
+      const categoryRuValue =
+        typeof categoryData.name === "object"
+          ? categoryData.name["ru"]
+          : categoryData.name;
+
+      const navLink = document.createElement("a");
+      navLink.href = `#${categoryId}`;
+      navLink.textContent = categoryDisplayName;
+      nav.appendChild(navLink);
+
+      const section = document.createElement("section");
+      section.id = categoryId;
+      section.className = "menu-category";
+      section.innerHTML = `
+        <h2 class="category-title">${categoryDisplayName}</h2>
+        <div class="dishes" id="dishes-${categoryId}"></div>
+      `;
+      container.appendChild(section);
+
+      renderMenu(categoryRuValue, `#dishes-${categoryId}`);
+    });
+  } catch (error) {
+    console.error("Ошибка динамической загрузки меню:", error);
+  }
+}
+
+// ---------- 5. Переключение языка ----------
+function switchLanguage(lang) {
+  currentLang = lang;
+  localStorage.setItem("language", lang);
+
+  applyTranslations();
+  initDynamicMenu();
+}
+
+// ---------- 6. Обработка кликов ----------
 document.addEventListener("click", (e) => {
   if (e.target.classList.contains("lang-btn")) {
     const lang = e.target.dataset.lang;
     switchLanguage(lang);
 
-    document.querySelectorAll(".lang-btn").forEach((btn) =>
-      btn.classList.remove("active")
-    );
-    e.target.classList.add("active");
+    document.querySelectorAll(".lang-btn").forEach((btn) => {
+      btn.classList.toggle("active", btn.dataset.lang === lang);
+    });
 
-    // Закрываем модальное окно
     const overlay = document.getElementById("welcomeOverlay");
     if (overlay) overlay.style.display = "none";
   }
 });
 
-// ---------- Статические переводы заголовков ----------
-
-
-// ---------- Функция для вложенных ключей ----------
-function getNestedValue(obj, path) {
-  return path.split(".").reduce((acc, key) => acc && acc[key], obj);
-}
-
-// ---------- Переключение языка ----------
-function switchLanguage(lang) {
-  currentLang = lang;
-
-  // Заголовки категорий
-  document.querySelectorAll(".category-title").forEach(title => {
-    const id = title.parentElement.id;
-    if (translations[lang].categories[id]) {
-      title.textContent = translations[lang].categories[id];
-    }
-  });
-
-  // Статические элементы (subtitle, footer)
-  document.querySelectorAll("[data-i18n]").forEach(el => {
-    const key = el.getAttribute("data-i18n");
-    const value = getNestedValue(translations[lang], key);
-    if (value) el.textContent = value;
-  });
-
-  // Перерисовка меню
-  renderAllCategories();
-}
-
-// ---------- Рендер всех категорий ----------
-const categories = [
-  { id: "main-dishes", selector: "#main-dishes .dishes" },
-  { id: "pizza", selector: "#pizza .dishes" },
-  { id: "salads", selector: "#salads .dishes" },
-  { id: "desserts", selector: "#desserts .dishes" },
-  { id: "drinks", selector: "#drinks .dishes" }
-];
-
-function renderAllCategories() {
-  categories.forEach(c => renderMenu(c.id, c.selector));
-}
-
-async function loadMenu(category) {
-  try {
-    const dishesRef = collection(db, "restaurants", "lumiere", "dishes");
-    
-    const q = query(dishesRef, where("category", "==", category));
-    
-    const menuSnapshot = await getDocs(q);
-    
-    if (menuSnapshot.empty) {
-      console.warn(`В базе нет блюд для категории: ${category}`);
-      return [];
-    }
-
-    return menuSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  } catch (error) {
-    console.error("Ошибка при загрузке из Firestore:", error);
-    return [];
-  }
-}
-
-function renderMenu(category, containerSelector) {
-  const container = document.querySelector(containerSelector);
-  if (!container) return;
-
-  loadMenu(category).then(items => {
-    container.innerHTML = "";
-    items.forEach(item => {
-      // Проверка на наличие данных, чтобы не вылетала ошибка
-      const name = item.name ? item.name[currentLang] : "Без названия";
-      const desc = item.desc ? item.desc[currentLang] : "";
-      const price = item.price || "Цена не указана";
-      const img = item.img || "https://via.placeholder.com/150";
-
-      const dish = document.createElement("div");
-      dish.className = "dish";
-      dish.innerHTML = `
-        <img src="${img}" alt="${name}">
-        <div class="dish-info">
-          <h3 class="dish-name">${name}</h3>
-          <p class="dish-desc">${desc}</p>
-          <span class="dish-price">${price}</span>
-        </div>
-      `;
-      container.appendChild(dish);
-    });
-  });
-}
-
-switchLanguage("ru");
+// ---------- СТАРТ ПРИЛОЖЕНИЯ ----------
+document.addEventListener("DOMContentLoaded", () => {
+  applyTranslations();
+  initDynamicMenu();
+});

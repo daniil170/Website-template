@@ -59,7 +59,7 @@ p {
 }
 
 .header-subtitle-info .subtitle:hover {
-  color: #E07A5F;
+  color: #e07a5f;
 }
 
 .header-actions {
@@ -79,9 +79,9 @@ p {
 }
 
 .lang-btn:hover {
-  background: #E07A5F;
+  background: #e07a5f;
   color: #fff;
-  border-color: #E07A5F;
+  border-color: #e07a5f;
 }
 
 .lang-btn.active {
@@ -116,13 +116,15 @@ p {
   border-radius: 10px;
   padding: 10px;
   align-items: center;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.05);
-  transition: transform 0.25s, box-shadow 0.25s;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  transition:
+    transform 0.25s,
+    box-shadow 0.25s;
 }
 
 .dish:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
 }
 
 .dish img {
@@ -155,7 +157,7 @@ p {
 .dish-price {
   font-size: 16px;
   font-weight: 600;
-  color: #E07A5F;
+  color: #e07a5f;
 }
 
 .footer {
@@ -193,7 +195,7 @@ p {
 }
 
 .footer-link:hover {
-  color: #E07A5F;
+  color: #e07a5f;
 }
 
 .footer-copy {
@@ -225,53 +227,83 @@ p {
 }
 
 .menu-nav a:hover {
-  background: #E07A5F;
+  background: #e07a5f;
   color: white;
 }
 
 .welcome-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
 }
 
 .welcome-modal {
-    background: #fff;
-    padding: 40px 30px;
-    border-radius: 16px;
-    text-align: center;
-    max-width: 320px;
-    width: 90%;
+  background: #fff;
+  padding: 40px 30px;
+  border-radius: 16px;
+  text-align: center;
+  max-width: 320px;
+  width: 90%;
 }
 
 .welcome-modal h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 24px;
-    margin-bottom: 10px;
+  font-family: "Playfair Display", serif;
+  font-size: 24px;
+  margin-bottom: 10px;
 }
 
 .welcome-modal p {
-    color: #888;
-    margin-bottom: 24px;
+  color: #888;
+  margin-bottom: 24px;
 }
 
 .welcome-modal button {
-    background: #000;
-    color: #fff;
-    border: none;
-    padding: 12px 32px;
-    border-radius: 8px;
-    font-size: 16px;
-    cursor: pointer;
+  background: #000;
+  color: #fff;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
 }
 
 @media (min-width: 768px) {
-    .container {
-        max-width: 480px;
-        margin: 0 auto;
-    }
+  .container {
+    max-width: 480px;
+    margin: 0 auto;
+  }
 }
+
+/* --- АНИМАЦИЯ ПОЯВЛЕНИЯ ---
+
+/* Состояние до анимации */
+/* .dish {
+  opacity: 0;
+  transform: translateY(30px); 
+  transition:
+    opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 0.25s,
+    transform 0.25s; 
+  will-change: transform, opacity;
+}
+
+
+.dish.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+
+.menu-category {
+  opacity: 0;
+  transition: opacity 1s ease-out;
+}
+
+.menu-category.show {
+  opacity: 1;
+}  

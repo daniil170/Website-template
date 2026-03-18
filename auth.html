@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+        rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles/auth.css">
+    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles/reset.css">
+    <title>Authorization</title>
+</head>
+
+<body>
+
+    <div class="auth-wrapper">
+        <h2 id="auth-title">Вход в систему</h2>
+
+        <div class="form-group">
+            <input type="email" id="email" placeholder="Email" required>
+        </div>
+
+        <div class="form-group">
+            <input type="password" id="password" placeholder="Пароль" required>
+        </div>
+
+        <button id="mainAuthBtn">Войти</button>
+
+        <div class="auth-options">
+            <span id="forgot-password">Забыли пароль?</span>
+        </div>
+
+        <div class="auth-toggle">
+            <p id="toggle-text">Нет аккаунта? <span id="toggle-link">Зарегистрироваться</span></p>
+        </div>
+
+        <p id="error-message"></p>
+    </div>
+
+    <script type="module" src="js/auth-logic.js"></script>
+</body>
+
+</html>
