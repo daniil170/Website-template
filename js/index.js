@@ -1,5 +1,4 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-analytics.js";
 import {
   getFirestore,
   collection,
@@ -8,7 +7,6 @@ import {
   where,
 } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
-// ---------- Firebase Config ----------
 const firebaseConfig = {
   apiKey: "AIzaSyAUIQqsfAiDxYBExYGXW828-6DFDprNfnQ",
   authDomain: "menu-template-5b0eb.firebaseapp.com",
@@ -16,197 +14,269 @@ const firebaseConfig = {
   storageBucket: "menu-template-5b0eb.firebasestorage.app",
   messagingSenderId: "371601105943",
   appId: "1:371601105943:web:daa1114eea08ee8ecc6852",
-  measurementId: "G-HPZ4L6058G",
 };
 
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 const db = getFirestore(app);
 
-// ---------- Translations (Статика) ----------
+let cart = [];
+let currentLang = localStorage.getItem("selectedLanguage") || "ru";
+
 const translations = {
   ru: {
     subtitle: "Современная итальянская кухня",
-    footer: {
-      address: "Алматы, Казахстан",
-      copy: "© 2026 Ресторан Lumiere",
-    },
+    cartView: "Показать заказ",
+    cartTitle: "Ваш заказ",
+    total: "Сумма:",
+    service: "Обслуживание (10%):",
+    totalWithService: "Итого к оплате:",
+    instruction: "Покажите этот экран официанту для подтверждения заказа",
+    footer: { address: "Алматы, Казахстан", copy: "© 2026 Lumiere" },
   },
   en: {
     subtitle: "Modern Italian Kitchen",
-    footer: {
-      address: "Almaty, Kazakhstan",
-      copy: "© 2026 Lumiere Restaurant",
-    },
+    cartView: "View Order",
+    cartTitle: "Your Order",
+    total: "Subtotal:",
+    service: "Service Fee (10%):",
+    totalWithService: "Total to pay:",
+    instruction: "Show this screen to the waiter to confirm your order",
+    footer: { address: "Almaty, Kazakhstan", copy: "© 2026 Lumiere" },
   },
   kz: {
     subtitle: "Заманауи итальян асханасы",
-    footer: {
-      address: "Алматы, Қазақстан",
-      copy: "© 2026 Lumiere мейрамханасы",
-    },
+    cartView: "Тапсырысты көру",
+    cartTitle: "Сіздің тапсырысыңыз",
+    total: "Тағамдар сомасы:",
+    service: "Қызмет көрсету (10%):",
+    totalWithService: "Төлеуге:",
+    instruction: "Тапсырысты растау үшін осы экранды даяшыға көрсетіңіз",
+    footer: { address: "Алматы, Қазақстан", copy: "© 2026 Lumiere" },
   },
 };
 
-let currentLang = localStorage.getItem("language") || "ru";
+// --- ФУНКЦИИ КОРЗИНЫ ---
 
-// ---------- 1. Функция перевода статических текстов ----------
-function applyTranslations() {
-  const langData = translations[currentLang];
-
-  const subtitle = document.querySelector("[data-i18n='subtitle']");
-  if (subtitle) subtitle.textContent = langData.subtitle;
-
-  const address = document.querySelector("[data-i18n='footer.address']");
-  if (address) address.textContent = langData.footer.address;
-
-  const copy = document.querySelector("[data-i18n='footer.copy']");
-  if (copy) copy.textContent = langData.footer.copy;
-}
-
-// ---------- 2. Загрузка блюд из Firebase ----------
-async function loadMenu(categoryName) {
-  try {
-    const dishesRef = collection(db, "restaurants", "lumiere", "dishes");
-    const q = query(dishesRef, where("category", "==", categoryName));
-    const menuSnapshot = await getDocs(q);
-    return menuSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-  } catch (error) {
-    console.error("Ошибка при загрузке блюд:", error);
-    return [];
+window.toggleCart = function () {
+  const modal = document.getElementById("cart-modal");
+  if (modal) {
+    const isVisible = modal.style.display === "block";
+    modal.style.display = isVisible ? "none" : "block";
+    document.body.style.overflow = isVisible ? "" : "hidden";
   }
+};
+
+window.addToCart = function (name, price) {
+  const existingItem = cart.find((item) => item.name === name);
+  if (existingItem) {
+    existingItem.quantity += 1;
+  } else {
+    cart.push({ name, price, quantity: 1 });
+  }
+  updateCartUI();
+  const cartNav = document.getElementById("cart-nav");
+  if (cartNav) cartNav.classList.remove("hidden");
+};
+
+window.changeQuantity = function (index, delta) {
+  if (!cart[index]) return;
+  cart[index].quantity += delta;
+  if (cart[index].quantity <= 0) {
+    cart.splice(index, 1);
+  }
+  updateCartUI();
+};
+
+function updateCartUI() {
+  const langData = translations[currentLang];
+  const itemsList = document.getElementById("cart-items-list");
+  if (!itemsList) return;
+
+  if (cart.length === 0) {
+    itemsList.innerHTML = `<p style="text-align:center; padding:20px; color:#888;">Корзина пуста / Empty</p>`;
+    document.getElementById("cart-nav")?.classList.add("hidden");
+    const modal = document.getElementById("cart-modal");
+    if (modal) modal.style.display = "none";
+    document.body.style.overflow = "";
+    return;
+  }
+
+  const subtotal = cart.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
+  const serviceCharge = Math.round(subtotal * 0.1);
+  const finalTotal = subtotal + serviceCharge;
+
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  if (document.getElementById("cart-count"))
+    document.getElementById("cart-count").innerText = totalItems;
+  if (document.getElementById("cart-total"))
+    document.getElementById("cart-total").innerText = `${finalTotal} ₸`;
+  if (document.getElementById("modal-total"))
+    document.getElementById("modal-total").innerText = `${finalTotal} ₸`;
+
+  let html = cart
+    .map(
+      (item, index) => `
+    <div class="cart-item">
+      <div class="cart-item-info">
+        <span class="cart-item-name">${item.name}</span>
+        <span class="cart-item-price">${item.price} ₸</span>
+      </div>
+      <div class="cart-controls">
+        <button class="qty-btn" onclick="changeQuantity(${index}, -1)">–</button>
+        <span class="qty-num">${item.quantity}</span>
+        <button class="qty-btn" onclick="changeQuantity(${index}, 1)">+</button>
+      </div>
+    </div>
+  `,
+    )
+    .join("");
+
+  html += `
+    <div class="cart-summary-details">
+      <div class="summary-line"><span>${langData.total}</span><span>${subtotal} ₸</span></div>
+      <div class="summary-line service-fee"><span>${langData.service}</span><span>${serviceCharge} ₸</span></div>
+      <div class="summary-line grand-total"><span>${langData.totalWithService}</span><span>${finalTotal} ₸</span></div>
+    </div>
+  `;
+
+  itemsList.innerHTML = html;
+  const instructionEl = document.querySelector(".cart-instruction");
+  if (instructionEl) instructionEl.textContent = langData.instruction;
 }
 
-// ---------- 3. Отрисовка карточек блюд (С АНИМАЦИЕЙ) ----------
-function renderMenu(categoryRuName, containerSelector) {
-  const container = document.querySelector(containerSelector);
-  if (!container) return;
+// --- ЛОГИКА МЕНЮ ---
 
-  loadMenu(categoryRuName).then((items) => {
-    container.innerHTML = "";
-    if (items.length === 0) {
-      container.innerHTML = `<p style="color: gray; font-style: italic; text-align: center; width: 100%;">Пока пусто...</p>`;
-      return;
-    }
-
-    // Создаем "наблюдателя" для плавного появления
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry, index) => {
-          if (entry.isIntersecting) {
-            // Добавляем небольшую задержку для эффекта "лесенки"
-            setTimeout(() => {
-              entry.target.classList.add("visible");
-            }, index * 100);
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.1 },
-    );
-
-    items.forEach((item) => {
-      const name =
-        typeof item.name === "object"
-          ? item.name[currentLang] || item.name["ru"]
-          : item.name;
-      const desc =
-        typeof item.description === "object"
-          ? item.description[currentLang] || item.description["ru"]
-          : item.description;
-      const price = item.price || "---";
-      const img = item.img || "https://via.placeholder.com/150";
-
-      const dishElement = document.createElement("div");
-      dishElement.className = "dish"; // Класс для CSS
-      dishElement.innerHTML = `
-        <img src="${img}" alt="${name}">
-        <div class="dish-info">
-          <h3 class="dish-name">${name}</h3>
-          <p class="dish-desc">${desc}</p>
-          <span class="dish-price">${price} ₸</span>
-        </div>
-      `;
-      container.appendChild(dishElement);
-      observer.observe(dishElement); // Начинаем следить за элементом
-    });
-  });
-}
-
-// ---------- 4. Динамическая сборка всего меню и навигации ----------
 async function initDynamicMenu() {
   const nav = document.getElementById("dynamic-nav");
   const container = document.getElementById("menu-container");
   if (!nav || !container) return;
 
+  nav.innerHTML = "";
+  container.innerHTML = "";
+
   try {
     const catSnapshot = await getDocs(
       collection(db, "restaurants", "lumiere", "categories"),
     );
+    for (const catDoc of catSnapshot.docs) {
+      const cat = catDoc.data();
+      const id = catDoc.id;
+      const name =
+        typeof cat.name === "object"
+          ? cat.name[currentLang] || cat.name["ru"]
+          : cat.name;
+      const ruName = typeof cat.name === "object" ? cat.name["ru"] : cat.name;
 
-    nav.innerHTML = "";
-    container.innerHTML = "";
-
-    catSnapshot.forEach((catDoc) => {
-      const categoryData = catDoc.data();
-      const categoryId = catDoc.id;
-
-      const categoryDisplayName =
-        typeof categoryData.name === "object"
-          ? categoryData.name[currentLang] || categoryData.name["ru"]
-          : categoryData.name;
-      const categoryRuValue =
-        typeof categoryData.name === "object"
-          ? categoryData.name["ru"]
-          : categoryData.name;
-
-      const navLink = document.createElement("a");
-      navLink.href = `#${categoryId}`;
-      navLink.textContent = categoryDisplayName;
-      nav.appendChild(navLink);
+      const link = document.createElement("a");
+      link.href = `#${id}`;
+      link.textContent = name;
+      nav.appendChild(link);
 
       const section = document.createElement("section");
-      section.id = categoryId;
-      section.className = "menu-category";
-      section.innerHTML = `
-        <h2 class="category-title">${categoryDisplayName}</h2>
-        <div class="dishes" id="dishes-${categoryId}"></div>
-      `;
+      section.id = id;
+      section.className = "menu-category show";
+      section.innerHTML = `<h2 class="category-title">${name}</h2><div class="dishes" id="list-${id}"></div>`;
       container.appendChild(section);
 
-      renderMenu(categoryRuValue, `#dishes-${categoryId}`);
-    });
-  } catch (error) {
-    console.error("Ошибка динамической загрузки меню:", error);
+      await renderDishes(ruName, `list-${id}`);
+    }
+  } catch (e) {
+    console.error("Firebase Error:", e);
   }
 }
 
-// ---------- 5. Переключение языка ----------
-function switchLanguage(lang) {
-  currentLang = lang;
-  localStorage.setItem("language", lang);
+async function renderDishes(categoryRuName, listId) {
+  const listContainer = document.getElementById(listId);
+  if (!listContainer) return;
 
-  applyTranslations();
-  initDynamicMenu();
+  const q = query(
+    collection(db, "restaurants", "lumiere", "dishes"),
+    where("category", "==", categoryRuName),
+  );
+  const querySnapshot = await getDocs(q);
+
+  querySnapshot.forEach((doc, index) => {
+    const d = doc.data();
+    const dName =
+      typeof d.name === "object" ? d.name[currentLang] || d.name["ru"] : d.name;
+    const dDesc =
+      typeof d.description === "object"
+        ? d.description[currentLang] || d.description["ru"]
+        : d.description;
+    const dPrice = d.price || 0;
+    const skeletonId = `skel-${doc.id}`;
+
+    const el = document.createElement("div");
+    el.className = "dish";
+    el.innerHTML = `
+      <div class="img-container">
+        <div id="${skeletonId}" class="skeleton-loader"></div>
+        <img src="${d.img || "assets/images/placeholder.jpg"}" 
+             alt="${dName}" 
+             class="dish-img loading"
+             onload="document.getElementById('${skeletonId}').remove(); this.classList.remove('loading');">
+      </div>
+      <div class="dish-info">
+        <h3 class="dish-name">${dName}</h3>
+        <p class="dish-desc">${dDesc}</p>
+        <span class="dish-price">${dPrice} ₸</span>
+      </div>
+      <button class="add-btn" onclick="addToCart('${dName.replace(/'/g, "\\'")}', ${dPrice})">+</button>
+    `;
+    listContainer.appendChild(el);
+    setTimeout(() => el.classList.add("visible"), index * 100);
+  });
 }
 
-// ---------- 6. Обработка кликов ----------
+function applyTranslations() {
+  const data = translations[currentLang];
+  if (!data) return;
+  const mapping = {
+    "[data-i18n='subtitle']": data.subtitle,
+    "[data-i18n='footer.address']": data.footer.address,
+    "[data-i18n='footer.copy']": data.footer.copy,
+    "[data-i18n='cart.view']": data.cartView,
+    "[data-i18n='cart.title']": data.cartTitle,
+    "[data-i18n='cart.total']": data.total,
+    ".cart-instruction": data.instruction,
+  };
+  for (let selector in mapping) {
+    const el = document.querySelector(selector);
+    if (el) el.textContent = mapping[selector];
+  }
+}
+
+// --- СОБЫТИЯ ---
+
 document.addEventListener("click", (e) => {
   if (e.target.classList.contains("lang-btn")) {
-    const lang = e.target.dataset.lang;
-    switchLanguage(lang);
-
-    document.querySelectorAll(".lang-btn").forEach((btn) => {
-      btn.classList.toggle("active", btn.dataset.lang === lang);
-    });
-
+    currentLang = e.target.dataset.lang;
+    localStorage.setItem("selectedLanguage", currentLang);
+    applyTranslations();
+    updateCartUI();
+    initDynamicMenu();
+    document
+      .querySelectorAll(".lang-btn")
+      .forEach((btn) =>
+        btn.classList.toggle("active", btn.dataset.lang === currentLang),
+      );
     const overlay = document.getElementById("welcomeOverlay");
     if (overlay) overlay.style.display = "none";
+    sessionStorage.setItem("welcomeShown", "true");
   }
 });
 
-// ---------- СТАРТ ПРИЛОЖЕНИЯ ----------
 document.addEventListener("DOMContentLoaded", () => {
+  if (sessionStorage.getItem("welcomeShown") === "true") {
+    const overlay = document.getElementById("welcomeOverlay");
+    if (overlay) overlay.style.display = "none";
+  }
   applyTranslations();
   initDynamicMenu();
+  updateCartUI();
+  const cartNav = document.getElementById("cart-nav");
+  if (cartNav) cartNav.onclick = window.toggleCart;
 });

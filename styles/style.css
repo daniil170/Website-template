@@ -111,27 +111,35 @@ p {
 
 .dish {
   display: flex;
-  gap: 12px;
-  background: #fff;
-  border-radius: 10px;
-  padding: 10px;
+  gap: 16px;
+  position: relative;
+  background: transparent;
+  border-bottom: 1px solid #eee;
+  padding: 15px 0;
+  border-radius: 0;
   align-items: center;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: none;
+  opacity: 0;
+  transform: translateY(20px);
   transition:
-    transform 0.25s,
-    box-shadow 0.25s;
+    opacity 0.6s ease-out,
+    transform 0.6s ease-out;
+}
+
+.dish.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .dish:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+  transform: translateX(5px);
 }
 
 .dish img {
-  width: 90px;
-  height: 90px;
+  width: 100px;
+  height: 100px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
 .dish-info {
@@ -142,10 +150,9 @@ p {
 }
 
 .dish-name {
-  font-size: 17px;
-  font-weight: 600;
-  color: #222;
-  margin: 0;
+  font-family: "Playfair Display", serif;
+  font-size: 18px;
+  margin-bottom: 4px;
 }
 
 .dish-desc {
@@ -155,9 +162,10 @@ p {
 }
 
 .dish-price {
-  font-size: 16px;
-  font-weight: 600;
-  color: #e07a5f;
+  font-family: "Open Sans", sans-serif;
+  font-weight: 700;
+  color: #222;
+  margin-top: 5px;
 }
 
 .footer {
@@ -206,29 +214,34 @@ p {
 .menu-nav {
   position: sticky;
   top: 0;
-  background: #fff;
-  padding: 10px 15px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  padding: 12px 15px;
   display: flex;
   gap: 10px;
   overflow-x: auto;
   border-bottom: 1px solid #eee;
-  z-index: 10;
+  z-index: 100;
+  scrollbar-width: none;
 }
 
 .menu-nav a {
-  text-decoration: none;
-  color: #222;
+  text-decoration: none; /* Убирает подчеркивание */
+  color: #222222; /* Ставит черный цвет текста вместо синего */
   font-size: 14px;
   white-space: nowrap;
-  padding: 6px 12px;
-  border-radius: 20px;
+  padding: 8px 16px;
+  border-radius: 50px;
   background: #f4f4f4;
-  transition: 0.25s;
+  display: inline-block; /* Чтобы отступы работали корректно */
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
 }
 
-.menu-nav a:hover {
-  background: #e07a5f;
-  color: white;
+.menu-nav a:hover,
+.menu-nav a.active-link {
+  background: #222;
+  color: #fff;
 }
 
 .welcome-overlay {
@@ -278,26 +291,137 @@ p {
   }
 }
 
+/* Кнопка добавления в карточке блюда */
+.add-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #222;
+  background: white;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: 0.2s;
+  margin-left: auto;
+}
+.add-btn:active {
+  transform: scale(0.9);
+  background: #222;
+  color: white;
+}
+
+/* Плашка внизу */
+.cart-nav {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 400px;
+  background: #222;
+  color: white;
+  padding: 15px 20px;
+  border-radius: 50px;
+  display: flex;
+  justify-content: center;
+  z-index: 1000;
+  cursor: pointer;
+  transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.cart-nav.hidden {
+  bottom: -100px;
+}
+.cart-nav-content {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.cart-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  display: none;
+  z-index: 2000;
+}
+
+.cart-modal-content {
+  position: absolute;
+  bottom: 0;
+  left: 50%; /* Центрируем */
+  transform: translateX(-50%); /* Центрируем */
+  width: 100%;
+  max-width: 500px; /* Ограничиваем ширину, чтобы не растягивалось на весь экран */
+  background: white;
+  border-radius: 25px 25px 0 0;
+  padding: 40px 20px 30px; /* Увеличили верхний отступ для кнопки */
+  max-height: 85vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.close-cart {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  border: none;
+  background: #f0f0f0; /* Добавим легкий фон, чтобы кнопка была заметнее */
+  font-size: 18px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2001; /* Поверх контента модалки */
+}
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+}
+.cart-footer {
+  margin-top: 20px;
+  text-align: center;
+}
+.cart-sum {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.cart-instruction {
+  font-size: 12px;
+  color: #888;
+}
+
 /* --- АНИМАЦИЯ ПОЯВЛЕНИЯ ---
 
 /* Состояние до анимации */
-/* .dish {
+.dish {
   opacity: 0;
-  transform: translateY(30px); 
+  transform: translateY(30px);
   transition:
     opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
     transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
     box-shadow 0.25s,
-    transform 0.25s; 
+    transform 0.25s;
   will-change: transform, opacity;
 }
-
 
 .dish.show {
   opacity: 1;
   transform: translateY(0);
 }
-
 
 .menu-category {
   opacity: 0;
@@ -306,4 +430,220 @@ p {
 
 .menu-category.show {
   opacity: 1;
-}  
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.cart-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cart-item-name {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.cart-item-price {
+  font-size: 13px;
+  color: #666;
+}
+
+.remove-btn {
+  background: #fff1f1; /* Нежно-красный фон */
+  color: #ff4d4d;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+}
+
+.remove-btn:active {
+  transform: scale(0.9);
+  background: #ff4d4d;
+  color: white;
+}
+
+.cart-instruction {
+  margin-top: 15px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #888;
+  padding: 0 10px;
+}
+
+.cart-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8f8f8;
+  padding: 4px 8px;
+  border-radius: 50px;
+}
+
+.qty-btn {
+  background: none;
+  border: none;
+  font-size: 18px;
+  font-weight: 600;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #222;
+}
+
+.qty-num {
+  font-size: 14px;
+  font-weight: 700;
+  min-width: 20px;
+  text-align: center;
+}
+
+/* Сделаем карточку в корзине чуть просторнее */
+.cart-item {
+  padding: 15px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.cart-summary-details {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 2px dashed #eee; /* Эффект линии отрыва чека */
+}
+
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 15px;
+  color: #444;
+}
+
+.service-fee {
+  color: #e07a5f; /* Выделим цветом процент обслуживания */
+  font-style: italic;
+}
+
+.grand-total {
+  margin-top: 10px;
+  font-size: 20px;
+  font-weight: 800;
+  color: #000;
+}
+
+/* --- АНИМАЦИЯ ЗАГРУЗКИ ИЗОБРАЖЕНИЙ (SKELETON SCREEN) --- */
+
+/* Класс пульсации */
+@keyframes loading-pulse {
+  0% {
+    background-color: #f0f0f0;
+  }
+  50% {
+    background-color: #e6e6e6;
+  }
+  100% {
+    background-color: #f0f0f0;
+  }
+}
+
+/* Контейнер для скелета (того же размера, что и будущее фото) */
+.image-loading-skeleton {
+  width: 100px; /* Размер как у .dish img */
+  height: 100px;
+  background-color: #f0f0f0;
+  border-radius: 12px;
+  animation: loading-pulse 1.5s infinite ease-in-out;
+  display: block;
+}
+
+/* Скрываем само изображение, пока оно не загрузилось */
+.dish img.hidden-load {
+  opacity: 0;
+  position: absolute; /* Чтобы не занимало место, пока грузится */
+}
+
+/* Плавно показываем изображение, когда оно готово */
+.dish img.loaded {
+  opacity: 1;
+  transition: opacity 0.5s ease;
+  position: relative; /* Возвращаем на место */
+}
+
+/* --- АДАПТИВНОСТЬ (MEDIA QUERIES) --- */
+
+/* Для мобильных устройств (ширина экрана до 600px) */
+@media screen and (max-width: 600px) {
+  /* 1. Делаем карточку блюда компактнее */
+  .dish {
+    padding: 10px;
+    gap: 12px;
+  }
+
+  /* 2. Подгоняем размер контейнера с фото и скелетоном */
+  .img-container,
+  .dish-img {
+    width: 80px; /* Чуть уменьшаем на мобилках */
+    height: 80px;
+    min-width: 80px; /* Чтобы картинка не сжималась в узкую полоску */
+  }
+
+  /* 3. Шрифт заголовков блюд */
+  .dish-name {
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+
+  /* 4. Блок итогов в корзине */
+  .cart-summary-details {
+    padding: 15px 5px;
+    margin-top: 10px;
+  }
+
+  .summary-line {
+    font-size: 14px; /* Чтобы длинные названия (например, на казахском) влезали в одну строку */
+  }
+
+  .grand-total {
+    font-size: 18px;
+  }
+
+  /* 5. Кнопка добавления (+) */
+  .add-btn {
+    width: 35px;
+    height: 35px;
+    font-size: 20px;
+  }
+}
+
+/* Для совсем маленьких экранов (старые iPhone SE и т.д.) */
+@media screen and (max-width: 380px) {
+  .dish-img,
+  .img-container {
+    width: 70px;
+    height: 70px;
+    min-width: 70px;
+  }
+
+  .dish-desc {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: 12px;
+  }
+}

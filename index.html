@@ -69,6 +69,26 @@
         </div>
     </div>
 
+    <div id="cart-nav" class="cart-nav hidden">
+        <div class="cart-nav-content">
+            <span id="cart-count">0</span>
+            <span data-i18n="cart.view">Показать заказ</span>
+            <span id="cart-total">0 ₸</span>
+        </div>
+    </div>
+
+    <div id="cart-modal" class="cart-overlay">
+        <div class="cart-modal-content">
+            <button class="close-cart" onclick="toggleCart()">✕</button>
+            <h2 data-i18n="cart.title">Ваш заказ</h2>
+            <div id="cart-items-list"></div>
+            <div class="cart-footer">
+                <div id="cart-summary-container"></div>
+                <p class="cart-instruction"></p>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="js/index.js"></script>
 
 </body>

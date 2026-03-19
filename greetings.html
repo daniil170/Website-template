@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+        rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles/greetings.css">
+    <link rel="stylesheet" href="styles/reset.css">
+    <title>Lumiere | Welcome</title>
+</head>
+
+<body>
+
+    <div id="welcome-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="restaurant-name">Lumiere</h2>
+            <p class="modal-text">Выберите язык / Select language</p>
+
+            <div class="modal-languages">
+                <button onclick="selectAndEnter('ru')" class="modal-btn">РУССКИЙ</button>
+                <button onclick="selectAndEnter('en')" class="modal-btn">ENGLISH</button>
+                <button onclick="selectAndEnter('kz')" class="modal-btn">ҚАЗАҚША</button>
+            </div>
+        </div>
+    </div>
+
+    <nav class="lang-switcher">
+        <span onclick="selectAndEnter('en')" id="btn-en">EN</span>
+        <span onclick="selectAndEnter('ru')" id="btn-ru">RU</span>
+        <span onclick="selectAndEnter('kz')" id="btn-kz">KZ</span>
+    </nav>
+
+    <main class="hero">
+        <img src="assets/images/logo.png" alt="Lumiere Logo" class="logo fade-in">
+        <h1 class="title fade-in">Lumiere</h1>
+        <p id="hero-subtitle" class="subtitle fade-in">Modern Italian Kitchen</p>
+
+        <a href="index.html" id="btn-menu" class="cta-button fade-in">Смотреть меню</a>
+    </main>
+
+    <footer class="footer-contacts fade-in">
+        <div class="social-links">
+            <a href="https://instagram.com/lumiere" target="_blank">Instagram</a>
+            <a href="https://wa.me/77000000000" target="_blank">WhatsApp</a>
+        </div>
+
+        <a href="https://2gis.kz/almaty/geo/..." target="_blank" class="address-widget">
+            <div class="address-icon">📍</div>
+            <div class="address-info">
+                <span class="city">Алматы</span>
+                <span id="loc-street" class="street">пр. Назарбаева, 123</span>
+            </div>
+        </a>
+    </footer>
+
+    <script src="js/greetings.js"></script>
+
+</body>
+
+</html>

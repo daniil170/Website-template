@@ -1,0 +1,327 @@
+:root {
+  --bg: #fcfcfc;
+  --dark: #1a1a1a;
+  --gray: #757575;
+  --accent: #2c2c2c;
+  --white: #ffffff;
+  --transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Montserrat", sans-serif;
+  background-color: var(--bg);
+  color: var(--dark);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* Модальное окно */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  transition: opacity 0.5s ease;
+}
+
+.modal-content {
+  background: var(--white);
+  padding: 40px;
+  border-radius: 30px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+  max-width: 340px;
+  width: 90%;
+}
+
+.restaurant-name {
+  font-family: "Playfair Display", serif;
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.modal-text {
+  font-size: 13px;
+  color: var(--gray);
+  margin-bottom: 25px;
+}
+
+.modal-languages {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.modal-btn {
+  padding: 16px;
+  background: var(--dark);
+  color: var(--white);
+  border: none;
+  border-radius: 15px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.modal-btn:active {
+  transform: scale(0.95);
+}
+
+/* Состояние скрытой модалки */
+.modal-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Главный экран */
+.hero {
+  text-align: center;
+}
+.logo {
+  width: 100px;
+  margin-bottom: 20px;
+}
+.title {
+  font-family: "Playfair Display", serif;
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+.subtitle {
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-size: 10px;
+  color: var(--gray);
+  margin-bottom: 40px;
+}
+
+.cta-button {
+  display: inline-block;
+  padding: 18px 45px;
+  background: var(--accent);
+  color: var(--white);
+  text-decoration: none;
+  border-radius: 50px;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  transition: var(--transition);
+}
+
+/* Переключатель в углу */
+.lang-switcher {
+  position: absolute;
+  top: 25px;
+  right: 25px;
+  font-size: 11px;
+}
+.lang-switcher span {
+  margin-left: 15px;
+  cursor: pointer;
+  color: var(--gray);
+}
+.lang-switcher .active {
+  color: var(--dark);
+  font-weight: 700;
+}
+
+/* Виджет адреса */
+.address-widget {
+  display: flex;
+  align-items: center;
+  background: var(--white);
+  padding: 12px 20px;
+  border-radius: 18px;
+  text-decoration: none;
+  margin-top: 20px;
+  border: 1px solid #eee;
+}
+.address-icon {
+  margin-right: 12px;
+  font-size: 20px;
+}
+.address-info {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+.city {
+  font-size: 9px;
+  text-transform: uppercase;
+  color: var(--gray);
+}
+.street {
+  font-size: 13px;
+  color: var(--dark);
+}
+
+.footer-contacts {
+  position: absolute;
+  bottom: 40px;
+  text-align: center;
+}
+.social-links a {
+  margin: 0 10px;
+  text-decoration: none;
+  color: var(--dark);
+  font-size: 12px;
+}
+
+/* Анимации появления */
+.fade-in {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fIn 0.8s forwards ease;
+}
+@keyframes fIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 390px) {
+  .modal-content {
+    padding: 32px 24px;
+    border-radius: 24px;
+  }
+
+  .restaurant-name {
+    font-size: 24px;
+  }
+
+  .modal-btn {
+    padding: 14px;
+    font-size: 13px;
+  }
+
+  .logo {
+    width: 80px;
+    margin-bottom: 16px;
+  }
+
+  .title {
+    font-size: 2.4rem;
+  }
+
+  .subtitle {
+    font-size: 9px;
+    letter-spacing: 2px;
+    margin-bottom: 32px;
+  }
+
+  .cta-button {
+    padding: 16px 36px;
+    font-size: 11px;
+  }
+
+  .footer-contacts {
+    bottom: 28px;
+  }
+
+  .address-widget {
+    padding: 10px 16px;
+  }
+
+  .street {
+    font-size: 12px;
+  }
+
+  .lang-switcher {
+    top: 18px;
+    right: 18px;
+  }
+}
+
+@media (max-width: 360px) {
+  .title {
+    font-size: 2rem;
+  }
+
+  .cta-button {
+    padding: 14px 28px;
+  }
+
+  .modal-content {
+    padding: 28px 20px;
+  }
+}
+
+@media (min-height: 800px) and (max-width: 600px) {
+  .logo {
+    width: 110px;
+  }
+
+  .title {
+    font-size: 3.4rem;
+  }
+
+  .subtitle {
+    margin-bottom: 48px;
+  }
+
+  .footer-contacts {
+    bottom: 52px;
+  }
+}
+
+@media (min-width: 600px) {
+  body {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .lang-switcher {
+    position: fixed;
+    top: 25px;
+    right: 25px;
+  }
+
+  .footer-contacts {
+    position: static;
+    margin-top: 40px;
+    text-align: center;
+    transform: none;
+    left: auto;
+    bottom: auto;
+    width: auto;
+    white-space: nowrap;
+  }
+
+  .modal-content {
+    max-width: 380px;
+  }
+
+  .modal-btn:hover {
+    background: #2e2e2e;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  .cta-button:hover {
+    background: #111;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  .social-links a:hover {
+    opacity: 0.6;
+  }
+}
