@@ -111,19 +111,14 @@ p {
 
 .dish {
   display: flex;
-  gap: 16px;
+  align-items: center; /* Центрируем текст по вертикали относительно фото */
+  gap: 15px; /* Расстояние между фото и текстом */
+  padding: 12px;
+  background: #fff;
+  border-radius: 15px;
+  margin-bottom: 10px;
   position: relative;
-  background: transparent;
-  border-bottom: 1px solid #eee;
-  padding: 15px 0;
-  border-radius: 0;
-  align-items: center;
-  box-shadow: none;
-  opacity: 0;
-  transform: translateY(20px);
-  transition:
-    opacity 0.6s ease-out,
-    transform 0.6s ease-out;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .dish.visible {
@@ -135,6 +130,14 @@ p {
   transform: translateX(5px);
 }
 
+.img-container {
+  flex-shrink: 0; /* Запрещаем картинке сжиматься */
+  width: 90px;
+  height: 90px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
 .dish img {
   width: 100px;
   height: 100px;
@@ -143,22 +146,27 @@ p {
 }
 
 .dish-info {
+  flex-grow: 1; /* Текст занимает всё оставшееся пространство */
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  flex: 1;
+  justify-content: center;
+  padding-right: 40px;
 }
 
 .dish-name {
-  font-family: "Playfair Display", serif;
-  font-size: 18px;
-  margin-bottom: 4px;
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
 }
 
 .dish-desc {
-  font-size: 14px;
+  font-size: 13px;
   color: #666;
-  margin: 0;
+  margin: 0 0 6px 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .dish-price {
@@ -293,6 +301,9 @@ p {
 
 /* Кнопка добавления в карточке блюда */
 .add-btn {
+  position: absolute; /* Кнопка фиксируется в одном месте */
+  right: 12px;
+  bottom: 12px; /* Или top: 50% / transform: translateY(-50%) */
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -304,7 +315,7 @@ p {
   justify-content: center;
   cursor: pointer;
   transition: 0.2s;
-  margin-left: auto;
+  z-index: 5;
 }
 .add-btn:active {
   transform: scale(0.9);
@@ -645,5 +656,21 @@ p {
     -webkit-box-orient: vertical;
     overflow: hidden;
     font-size: 12px;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  #cart-nav {
+    height: 48px; /* Было больше, делаем компактнее */
+    padding: 0 20px;
+    bottom: 10px;
+    width: 94%;
+    left: 3%;
+    font-size: 14px;
+  }
+
+  #cart-total {
+    font-size: 15px;
+    font-weight: 700;
   }
 }
