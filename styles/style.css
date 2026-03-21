@@ -689,19 +689,3 @@ p {
     font-size: 12px;
   }
 }
-
-@media screen and (max-width: 600px) {
-  #cart-nav {
-    height: 48px; /* Было больше, делаем компактнее */
-    padding: 0 20px;
-    bottom: 10px;
-    width: 94%;
-    left: 3%;
-    font-size: 14px;
-  }
-
-  #cart-total {
-    font-size: 15px;
-    font-weight: 700;
-  }
-}
