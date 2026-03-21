@@ -113,8 +113,6 @@ function updateCartUI() {
     document.getElementById("cart-count").innerText = totalItems;
   if (document.getElementById("cart-total"))
     document.getElementById("cart-total").innerText = `${finalTotal} ₸`;
-  if (document.getElementById("modal-total"))
-    document.getElementById("modal-total").innerText = `${finalTotal} ₸`;
 
   let html = cart
     .map(
@@ -161,6 +159,8 @@ async function initDynamicMenu() {
     const catSnapshot = await getDocs(
       collection(db, "restaurants", "lumiere", "categories"),
     );
+
+    // Используем for...of для последовательной загрузки, чтобы избежать багов с порядком
     for (const catDoc of catSnapshot.docs) {
       const cat = catDoc.data();
       const id = catDoc.id;
@@ -192,6 +192,8 @@ async function renderDishes(categoryRuName, listId) {
   const listContainer = document.getElementById(listId);
   if (!listContainer) return;
 
+  listContainer.innerHTML = ""; // ОЧИЩАЕМ перед рендером, чтобы не было дублей
+
   const q = query(
     collection(db, "restaurants", "lumiere", "dishes"),
     where("category", "==", categoryRuName),
@@ -213,11 +215,11 @@ async function renderDishes(categoryRuName, listId) {
     el.className = "dish";
     el.innerHTML = `
       <div class="img-container">
-        <div id="${skeletonId}" class="skeleton-loader"></div>
+        <div id="${skeletonId}" class="image-loading-skeleton"></div>
         <img src="${d.img || "assets/images/placeholder.jpg"}" 
              alt="${dName}" 
-             class="dish-img loading"
-             onload="document.getElementById('${skeletonId}').remove(); this.classList.remove('loading');">
+             class="dish-img hidden-load"
+             onload="const skel=document.getElementById('${skeletonId}'); if(skel) skel.remove(); this.classList.add('loaded'); this.classList.remove('hidden-load');">
       </div>
       <div class="dish-info">
         <h3 class="dish-name">${dName}</h3>
@@ -227,7 +229,7 @@ async function renderDishes(categoryRuName, listId) {
       <button class="add-btn" onclick="addToCart('${dName.replace(/'/g, "\\'")}', ${dPrice})">+</button>
     `;
     listContainer.appendChild(el);
-    setTimeout(() => el.classList.add("visible"), index * 100);
+    setTimeout(() => el.classList.add("visible", "show"), index * 100);
   });
 }
 
@@ -240,7 +242,6 @@ function applyTranslations() {
     "[data-i18n='footer.copy']": data.footer.copy,
     "[data-i18n='cart.view']": data.cartView,
     "[data-i18n='cart.title']": data.cartTitle,
-    "[data-i18n='cart.total']": data.total,
     ".cart-instruction": data.instruction,
   };
   for (let selector in mapping) {
@@ -257,12 +258,14 @@ document.addEventListener("click", (e) => {
     localStorage.setItem("selectedLanguage", currentLang);
     applyTranslations();
     updateCartUI();
-    initDynamicMenu();
+    initDynamicMenu(); // Перерисовываем меню на новом языке
+
     document
       .querySelectorAll(".lang-btn")
       .forEach((btn) =>
         btn.classList.toggle("active", btn.dataset.lang === currentLang),
       );
+
     const overlay = document.getElementById("welcomeOverlay");
     if (overlay) overlay.style.display = "none";
     sessionStorage.setItem("welcomeShown", "true");

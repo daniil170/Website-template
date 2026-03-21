@@ -1,20 +1,18 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+    <link
+        href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&family=Playfair+Display:wght@400;600;700;900&display=swap"
         rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
-        rel="stylesheet">
+
     <link rel="stylesheet" href="styles/style.css">
     <link rel="stylesheet" href="styles/reset.css">
-    <title>Menu Template</title>
+    <title>Lumiere - Modern Italian Kitchen</title>
 </head>
 
 <body>
@@ -25,13 +23,13 @@
                     <img src="assets/images/logo.png" alt="Logo" class="logo">
                 </div>
                 <div class="header-title-info">
-                    <h3 class="header-title">Lumiere</h3>
+                    <h1 class="header-title">Lumiere</h1>
                 </div>
                 <div class="header-subtitle-info">
-                    <blockquote class="subtitle" data-i18n="subtitle">Modern Italian Kitchen</blockquote>
+                    <p class="subtitle" data-i18n="subtitle">Современная итальянская кухня</p>
                 </div>
                 <div class="header-actions">
-                    <button class="lang-btn active" data-lang="en">EN</button>
+                    <button class="lang-btn" data-lang="en">EN</button>
                     <button class="lang-btn" data-lang="ru">RU</button>
                     <button class="lang-btn" data-lang="kz">KZ</button>
                 </div>
@@ -39,11 +37,9 @@
         </div>
     </header>
 
-    <nav class="menu-nav" id="dynamic-nav">
-    </nav>
+    <nav class="menu-nav" id="dynamic-nav"></nav>
 
-    <main class="menu" id="menu-container">
-    </main>
+    <main class="menu" id="menu-container"></main>
 
     <footer class="footer">
         <div class="container">
@@ -60,9 +56,9 @@
     <div class="welcome-overlay" id="welcomeOverlay">
         <div class="welcome-modal">
             <h2 id="welcome-title">Добро пожаловать</h2>
-            <p id="welcome-subtitle">Выберите язык</p>
+            <p id="welcome-subtitle">Выберите язык / Choose language</p>
             <div class="welcome-lang-btns">
-                <button class="lang-btn active" data-lang="en">EN</button>
+                <button class="lang-btn" data-lang="en">EN</button>
                 <button class="lang-btn" data-lang="ru">RU</button>
                 <button class="lang-btn" data-lang="kz">KZ</button>
             </div>
@@ -80,17 +76,18 @@
     <div id="cart-modal" class="cart-overlay">
         <div class="cart-modal-content">
             <button class="close-cart" onclick="toggleCart()">✕</button>
-            <h2 data-i18n="cart.title">Ваш заказ</h2>
-            <div id="cart-items-list"></div>
+            <h2 data-i18n="cart.title" style="margin-bottom: 20px;">Ваш заказ</h2>
+
+            <div id="cart-items-list">
+            </div>
+
             <div class="cart-footer">
-                <div id="cart-summary-container"></div>
                 <p class="cart-instruction"></p>
             </div>
         </div>
     </div>
 
     <script type="module" src="js/index.js"></script>
-
 </body>
 
 </html>
