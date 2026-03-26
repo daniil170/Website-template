@@ -118,7 +118,7 @@ p {
   border-radius: 15px;
   margin-bottom: 12px;
   position: relative;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .img-container {
@@ -303,6 +303,87 @@ p {
   cursor: pointer;
 }
 
+/* Базовое состояние блюда (скрыто) */
+.dish {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1); /* Плавный выезд */
+  will-change: transform, opacity;
+}
+
+/* Состояние при появлении */
+.dish.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Анимация для скелетона (пульсация) */
+.image-loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Эффект при нажатии на кнопку "+" */
+.add-btn:active {
+  transform: scale(0.8);
+  transition: transform 0.1s;
+}
+
+/* Мягкое появление категорий */
+.category-title {
+  opacity: 0;
+  animation: fadeIn 0.8s forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes bump {
+  0% {
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    transform: translateX(-50%) scale(1.05);
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+.cart-bump {
+  animation: bump 0.3s ease-out;
+}
+
+.fly-item {
+  position: fixed;
+  z-index: 10001;
+  pointer-events: none;
+  object-fit: cover;
+  border-radius: 20px;
+  transition:
+    top 0.8s cubic-bezier(0.42, 0, 0.58, 1),
+    left 0.8s cubic-bezier(0.42, 0, 0.58, 1),
+    transform 0.8s ease-in-out,
+    width 0.8s ease-in-out,
+    height 0.8s ease-in-out,
+    opacity 0.8s ease-in;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  will-change: transform, top, left;
+}
+
 @media (min-width: 768px) {
   .container {
     max-width: 480px;
@@ -354,6 +435,10 @@ p {
 }
 .cart-nav.hidden {
   bottom: -100px;
+}
+
+.hidden {
+    display: none !important;
 }
 
 .cart-nav:active {
@@ -429,34 +514,6 @@ p {
 .cart-instruction {
   font-size: 12px;
   color: #888;
-}
-
-/* --- АНИМАЦИЯ ПОЯВЛЕНИЯ ---
-
-/* Состояние до анимации */
-.dish {
-  opacity: 0;
-  transform: translateY(30px);
-  transition:
-    opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
-    transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1),
-    box-shadow 0.25s,
-    transform 0.25s;
-  will-change: transform, opacity;
-}
-
-.dish.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.menu-category {
-  opacity: 0;
-  transition: opacity 1s ease-out;
-}
-
-.menu-category.show {
-  opacity: 1;
 }
 
 .cart-item {
@@ -658,14 +715,27 @@ p {
   }
 
   #cart-nav {
-  height: 48px;
-  padding: 0 20px;
-  bottom: 10px;
-  width: 94%;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 14px;
-}
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    width: calc(100% - 40px);
+
+    height: 54px;
+
+    background: #1a1a1a;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    border-radius: 12px;
+
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+    z-index: 10000;
+    cursor: pointer;
+  }
 
   #cart-total {
     font-size: 15px;

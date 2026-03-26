@@ -10,6 +10,7 @@ import {
   addDoc,
   getDocs,
   getDoc,
+  updateDoc,
   deleteDoc,
   doc,
   query,
@@ -30,7 +31,6 @@ const firebaseConfig = {
   storageBucket: "menu-template-5b0eb.firebasestorage.app",
   messagingSenderId: "371601105943",
   appId: "1:371601105943:web:daa1114eea08ee8ecc6852",
-  measurementId: "G-HPZ4L6058G",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -38,30 +38,12 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-const addForm = document.getElementById("addDishForm");
+let currentFilter = "all";
 
-// --- 1. ПРЕДПРОСМОТР ФОТО ---
-document.getElementById("dishImgFile").addEventListener("change", function (e) {
-  const file = e.target.files[0];
-  const previewContainer = document.getElementById("previewContainer");
-  const previewImg = document.getElementById("imgPreview");
-
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      previewImg.src = event.target.result;
-      previewContainer.style.display = "block";
-    };
-    reader.readAsDataURL(file);
-  } else {
-    previewContainer.style.display = "none";
-  }
-});
-
-// --- 2. ЗАЩИТА И ЗАГРУЗКА ДАННЫХ ---
+// --- ПРОВЕРКА АВТОРИЗАЦИИ ---
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    document.body.style.display = "block";
+    document.body.classList.add("auth-success");
     loadAdminMenu();
     loadCategoriesToSelect();
     loadAdminCategories();
@@ -70,96 +52,132 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-document.getElementById("logoutBtn").addEventListener("click", () => {
+document.getElementById("logoutBtn")?.addEventListener("click", () => {
   signOut(auth).then(() => (window.location.href = "auth.html"));
 });
 
-// --- 3. ДОБАВЛЕНИЕ БЛЮДА ---
-addForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const file = document.getElementById("dishImgFile").files[0];
-  if (!file) return alert("Выберите файл!");
+// --- ДОБАВЛЕНИЕ БЛЮДА ---
+document
+  .getElementById("addDishForm")
+  ?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const file = document.getElementById("dishImgFile").files[0];
+    if (!file) return alert("Выберите файл!");
 
-  const submitBtn = e.target.querySelector('button[type="submit"]');
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
 
-  try {
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Загрузка...";
+    try {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<span class="spinner"></span> Публикация...';
 
-    const storageRef = ref(storage, "dishes/" + Date.now() + "_" + file.name);
-    const snapshot = await uploadBytes(storageRef, file);
-    const downloadURL = await getDownloadURL(snapshot.ref);
+      const storageRef = ref(storage, "dishes/" + Date.now() + "_" + file.name);
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
 
-    const newDish = {
-      name: {
-        ru: document.getElementById("dishNameRu").value.trim(),
-        en: document.getElementById("dishNameEn").value.trim(),
-        kz: document.getElementById("dishNameKz").value.trim(),
-      },
-      description: {
-        ru: document.getElementById("dishDescRu").value.trim(),
-        en: document.getElementById("dishDescEn").value.trim(),
-        kz: document.getElementById("dishDescKz").value.trim(),
-      },
-      price: Number(document.getElementById("dishPrice").value),
-      img: downloadURL,
-      category: document.getElementById("dishCategory").value, // Тут будет RU строка
-      createdAt: new Date(),
-    };
+      await addDoc(collection(db, "restaurants", "lumiere", "dishes"), {
+        name: {
+          ru: document.getElementById("dishNameRu").value.trim(),
+          en: document.getElementById("dishNameEn").value.trim(),
+          kz: document.getElementById("dishNameKz").value.trim(),
+        },
+        description: {
+          ru: document.getElementById("dishDescRu").value.trim(),
+          en: document.getElementById("dishDescEn").value.trim(),
+          kz: document.getElementById("dishDescKz").value.trim(),
+        },
+        price: Number(document.getElementById("dishPrice").value),
+        img: downloadURL,
+        category: document.getElementById("dishCategory").value,
+        createdAt: new Date(),
+      });
 
-    await addDoc(collection(db, "restaurants", "lumiere", "dishes"), newDish);
-    alert("Блюдо успешно добавлено!");
-    addForm.reset();
-    document.getElementById("previewContainer").style.display = "none";
-    loadAdminMenu();
-  } catch (error) {
-    console.error("Ошибка:", error);
-    alert("Ошибка при сохранении.");
-  } finally {
-    submitBtn.disabled = false;
-    submitBtn.textContent = "Опубликовать в меню";
-  }
-});
+      alert("Блюдо успешно добавлено!");
+      e.target.reset();
+      document.getElementById("previewContainer").classList.remove("show");
+      loadAdminMenu();
+    } catch (error) {
+      console.error(error);
+      alert("Ошибка при добавлении");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
+    }
+  });
 
-// --- 4. ЗАГРУЗКА КАТЕГОРИЙ В SELECT ---
+// --- РЕДАКТИРОВАНИЕ БЛЮДА (ОБНОВЛЕННО) ---
+document
+  .getElementById("editDishForm")
+  ?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const submitBtn = e.target.querySelector(".btn-save-changes");
+    const originalText = submitBtn.innerHTML;
+    const id = document.getElementById("editDishId").value;
+    const docRef = doc(db, "restaurants", "lumiere", "dishes", id);
+
+    try {
+      // Включаем анимацию загрузки
+      submitBtn.disabled = true;
+      submitBtn.classList.add("loading");
+      submitBtn.innerHTML = '<span class="spinner"></span> Сохранение...';
+
+      await updateDoc(docRef, {
+        "name.ru": document.getElementById("editNameRu").value.trim(),
+        "name.en": document.getElementById("editNameEn").value.trim(),
+        "name.kz": document.getElementById("editNameKz").value.trim(),
+        "description.ru": document.getElementById("editDescRu").value.trim(),
+        "description.en": document.getElementById("editDescEn").value.trim(),
+        "description.kz": document.getElementById("editDescKz").value.trim(),
+        price: Number(document.getElementById("editPrice").value),
+        category: document.getElementById("editCategory").value,
+      });
+
+      // Успешно сохранено
+      document.getElementById("editModal").style.display = "none";
+      loadAdminMenu();
+    } catch (err) {
+      console.error("Ошибка обновления:", err);
+      alert("Не удалось сохранить изменения.");
+    } finally {
+      // Возвращаем кнопку в исходное состояние
+      submitBtn.disabled = false;
+      submitBtn.classList.remove("loading");
+      submitBtn.innerHTML = originalText;
+    }
+  });
+
+// --- ЗАГРУЗКА КАТЕГОРИЙ В SELECT ---
 async function loadCategoriesToSelect() {
-  const select = document.getElementById("dishCategory");
-  if (!select) return;
+  const selects = [
+    document.getElementById("dishCategory"),
+    document.getElementById("editCategory"),
+  ];
+  const q = query(
+    collection(db, "restaurants", "lumiere", "categories"),
+    orderBy("createdAt", "asc"),
+  );
+  const querySnapshot = await getDocs(q);
 
-  try {
-    // Сортируем по дате создания, чтобы порядок был логичным
-    const q = query(
-      collection(db, "restaurants", "lumiere", "categories"),
-      orderBy("createdAt", "asc"),
-    );
-    const querySnapshot = await getDocs(q);
-
+  selects.forEach((select) => {
+    if (!select) return;
     select.innerHTML =
       '<option value="" disabled selected>Выберите категорию</option>';
-
     querySnapshot.forEach((docSnap) => {
-      const categoryData = docSnap.data();
-      // Извлекаем RU название. Если в базе Map, берем .ru, если строка - саму строку.
-      const catRu =
-        typeof categoryData.name === "object"
-          ? categoryData.name.ru
-          : categoryData.name;
-
+      const catRu = docSnap.data().name.ru;
       const option = document.createElement("option");
-      option.value = catRu; // Сохраняем строку RU как ключ связи
+      option.value = catRu;
       option.textContent = catRu;
       select.appendChild(option);
     });
-  } catch (error) {
-    console.error("Ошибка загрузки категорий в select:", error);
-  }
+  });
 }
 
-// --- 5. СПИСОК БЛЮД И УДАЛЕНИЕ ---
+// --- ОСНОВНАЯ ФУНКЦИЯ: ТЕКУЩЕЕ МЕНЮ ---
 async function loadAdminMenu() {
   const listContainer = document.getElementById("adminDishList");
+  const filterContainer = document.getElementById("dynamicFilters");
   if (!listContainer) return;
-  listContainer.innerHTML = "Загрузка...";
 
   try {
     const q = query(
@@ -167,116 +185,152 @@ async function loadAdminMenu() {
       orderBy("createdAt", "desc"),
     );
     const querySnapshot = await getDocs(q);
-    listContainer.innerHTML = "";
+    const groupedDishes = {};
 
     querySnapshot.forEach((docSnap) => {
       const dish = docSnap.data();
-      const id = docSnap.id;
-      const dishName = typeof dish.name === "object" ? dish.name.ru : dish.name;
-
-      const item = document.createElement("div");
-      item.className = "admin-dish-item";
-      item.innerHTML = `
-        <span>${dishName} (${dish.price}₸)</span>
-        <button onclick="deleteDish('${id}')" class="delete-btn">Удалить</button>
-      `;
-      listContainer.appendChild(item);
+      const cat = dish.category || "Без категории";
+      if (!groupedDishes[cat]) groupedDishes[cat] = [];
+      groupedDishes[cat].push({ id: docSnap.id, ...dish });
     });
+
+    if (filterContainer) {
+      filterContainer.innerHTML = "";
+      Object.keys(groupedDishes).forEach((catName) => {
+        const btn = document.createElement("button");
+        btn.textContent = catName;
+        btn.className = `filter-btn ${currentFilter === catName ? "active" : ""}`;
+        btn.onclick = () => {
+          currentFilter = catName;
+          loadAdminMenu();
+        };
+        filterContainer.appendChild(btn);
+      });
+
+      const allBtn = document.querySelector('[data-category="all"]');
+      if (allBtn) {
+        allBtn.classList.toggle("active", currentFilter === "all");
+        allBtn.onclick = () => {
+          currentFilter = "all";
+          loadAdminMenu();
+        };
+      }
+    }
+
+    listContainer.innerHTML = "";
+    for (const [categoryName, dishes] of Object.entries(groupedDishes)) {
+      if (currentFilter !== "all" && currentFilter !== categoryName) continue;
+
+      const categorySection = document.createElement("div");
+      categorySection.className = "admin-menu-section";
+      categorySection.innerHTML = `<h3 class="category-header">${categoryName}</h3>`;
+
+      dishes.forEach((dish) => {
+        const item = document.createElement("div");
+        item.className = "admin-dish-item";
+        item.innerHTML = `
+            <div class="dish-info-text">
+                <span class="dish-name">${dish.name.ru}</span>
+                <span class="dish-price">${dish.price} ₸</span>
+            </div>
+            <div class="dish-actions">
+                <button onclick="openEditModal('${dish.id}')" class="btn-edit">Изменить</button>
+                <button onclick="deleteDish('${dish.id}')" class="btn-delete">Удалить</button>
+            </div>
+        `;
+        categorySection.appendChild(item);
+      });
+      listContainer.appendChild(categorySection);
+    }
   } catch (e) {
-    listContainer.innerHTML = "Ошибка загрузки списка блюд.";
+    console.error(e);
   }
 }
 
-window.deleteDish = async (id) => {
-  if (!confirm("Удалить это блюдо?")) return;
-  try {
-    const dishRef = doc(db, "restaurants", "lumiere", "dishes", id);
-    const dishSnap = await getDoc(dishRef);
-    if (dishSnap.exists()) {
-      const imageUrl = dishSnap.data().img;
-      if (imageUrl && imageUrl.includes("firebasestorage")) {
-        const imageRef = ref(storage, imageUrl);
-        await deleteObject(imageRef).catch(() =>
-          console.log("Файл не найден в Storage"),
-        );
-      }
-    }
-    await deleteDoc(dishRef);
-    loadAdminMenu();
-  } catch (error) {
-    console.error(error);
+// --- МОДАЛЬНОЕ ОКНО РЕДАКТИРОВАНИЯ ---
+window.openEditModal = async (id) => {
+  const docRef = doc(db, "restaurants", "lumiere", "dishes", id);
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    const data = docSnap.data();
+    document.getElementById("editDishId").value = id;
+    document.getElementById("editNameRu").value = data.name.ru || "";
+    document.getElementById("editNameEn").value = data.name.en || "";
+    document.getElementById("editNameKz").value = data.name.kz || "";
+    document.getElementById("editDescRu").value = data.description.ru || "";
+    document.getElementById("editDescEn").value = data.description.en || "";
+    document.getElementById("editDescKz").value = data.description.kz || "";
+    document.getElementById("editPrice").value = data.price || "";
+    document.getElementById("editCategory").value = data.category || "";
+
+    document.getElementById("editModal").style.display = "block";
   }
 };
 
-// --- 6. ДОБАВЛЕНИЕ КАТЕГОРИИ ---
-document.getElementById("saveCatBtn").addEventListener("click", async () => {
-  const nameRu = document.getElementById("newCatRu").value.trim();
-  const nameEn = document.getElementById("newCatEn").value.trim();
-  const nameKz = document.getElementById("newCatKz").value.trim();
-
-  if (!nameRu || !nameEn || !nameKz) return alert("Заполните все языки!");
-
-  try {
-    await addDoc(collection(db, "restaurants", "lumiere", "categories"), {
-      name: { ru: nameRu, en: nameEn, kz: nameKz },
-      createdAt: new Date(),
-    });
-
-    alert("Категория добавлена!");
-    document.getElementById("newCatRu").value = "";
-    document.getElementById("newCatEn").value = "";
-    document.getElementById("newCatKz").value = "";
-
-    loadAdminCategories();
-    loadCategoriesToSelect();
-  } catch (e) {
-    console.error(e);
-  }
+document.getElementById("closeEditModal")?.addEventListener("click", () => {
+  document.getElementById("editModal").style.display = "none";
 });
 
-// --- 7. СПИСОК КАТЕГОРИЙ И УДАЛЕНИЕ ---
+window.onclick = (event) => {
+  const modal = document.getElementById("editModal");
+  if (event.target == modal) modal.style.display = "none";
+};
+
+// --- УПРАВЛЕНИЕ КАТЕГОРИЯМИ ---
+document.getElementById("saveCatBtn")?.addEventListener("click", async () => {
+  const nameRu = document.getElementById("newCatRu").value.trim();
+  if (!nameRu) return;
+  await addDoc(collection(db, "restaurants", "lumiere", "categories"), {
+    name: {
+      ru: nameRu,
+      en: document.getElementById("newCatEn").value.trim(),
+      kz: document.getElementById("newCatKz").value.trim(),
+    },
+    createdAt: new Date(),
+  });
+  loadAdminCategories();
+  loadCategoriesToSelect();
+});
+
 async function loadAdminCategories() {
   const listContainer = document.getElementById("adminCategoryList");
   if (!listContainer) return;
-
-  try {
-    const q = query(
-      collection(db, "restaurants", "lumiere", "categories"),
-      orderBy("createdAt", "asc"),
-    );
-    const querySnapshot = await getDocs(q);
-    listContainer.innerHTML = "";
-
-    querySnapshot.forEach((docSnap) => {
-      const cat = docSnap.data();
-      const id = docSnap.id;
-      const catName = typeof cat.name === "object" ? cat.name.ru : cat.name;
-
-      const item = document.createElement("div");
-      item.className = "admin-cat-item";
-      item.style =
-        "display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #eee; align-items: center;";
-      item.innerHTML = `
-        <strong>${catName}</strong>
-        <button onclick="deleteCategory('${id}')" style="color: white; background: #ff4d4d; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">Удалить</button>
-      `;
-      listContainer.appendChild(item);
-    });
-  } catch (e) {
-    console.error(e);
-  }
+  const q = query(
+    collection(db, "restaurants", "lumiere", "categories"),
+    orderBy("createdAt", "asc"),
+  );
+  const querySnapshot = await getDocs(q);
+  listContainer.innerHTML = "";
+  querySnapshot.forEach((docSnap) => {
+    const item = document.createElement("div");
+    item.className = "category-manage-item";
+    item.innerHTML = `
+        <strong>${docSnap.data().name.ru}</strong>
+        <button onclick="deleteCategory('${docSnap.id}')" class="btn-delete-cat">Удалить</button>
+    `;
+    listContainer.appendChild(item);
+  });
 }
 
-window.deleteCategory = async (id) => {
-  if (
-    !confirm("Удалить категорию? Блюда останутся, но могут скрыться из меню.")
-  )
-    return;
-  try {
-    await deleteDoc(doc(db, "restaurants", "lumiere", "categories", id));
-    loadAdminCategories();
-    loadCategoriesToSelect();
-  } catch (e) {
-    console.error(e);
+// --- УДАЛЕНИЕ ---
+window.deleteDish = async (id) => {
+  if (!confirm("Удалить блюдо?")) return;
+  const dishRef = doc(db, "restaurants", "lumiere", "dishes", id);
+  const dishSnap = await getDoc(dishRef);
+  if (dishSnap.exists()) {
+    const imageUrl = dishSnap.data().img;
+    if (imageUrl?.includes("firebasestorage")) {
+      await deleteObject(ref(storage, imageUrl)).catch(() => {});
+    }
   }
+  await deleteDoc(dishRef);
+  loadAdminMenu();
+};
+
+window.deleteCategory = async (id) => {
+  if (!confirm("Удалить категорию?")) return;
+  await deleteDoc(doc(db, "restaurants", "lumiere", "categories", id));
+  loadAdminCategories();
+  loadCategoriesToSelect();
+  loadAdminMenu();
 };

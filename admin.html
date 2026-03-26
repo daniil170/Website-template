@@ -18,69 +18,77 @@
     <title>Menu Template | Admin</title>
 </head>
 
-<body style="display: none;">
+<body class="auth-success">
+    <div id="editModal" class="modal-overlay">
+        <div class="modal-content">
+            <span id="closeEditModal" class="modal-close">&times;</span>
+            <h2>Редактировать блюдо</h2>
+            <form id="editDishForm" class="dish-form">
+                <input type="hidden" id="editDishId">
+                <input type="text" id="editNameRu" placeholder="Название (RU)" required>
+                <input type="text" id="editNameEn" placeholder="Name (EN)">
+                <input type="text" id="editNameKz" placeholder="Атауы (KZ)">
+                <textarea id="editDescRu" placeholder="Описание (RU)"></textarea>
+                <textarea id="editDescEn" placeholder="Description (EN)"></textarea>
+                <textarea id="editDescKz" placeholder="Сипаттамасы (KZ)"></textarea>
+                <input type="number" id="editPrice" placeholder="Цена (₸)" required>
+                <label>Категория:</label>
+                <select id="editCategory" required></select>
+                <button type="submit" class="btn-save-changes">Сохранить изменения</button>
+            </form>
+        </div>
+    </div>
+
     <nav class="admin-nav">
         <h1>Admin Panel</h1>
-        <button id="logoutBtn">Выйти</button>
+        <button id="logoutBtn" class="btn-logout">Выйти</button>
     </nav>
 
     <div class="admin-category-box">
         <h4>Добавить новую категорию</h4>
-        <div class="lang-group" style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;">
-            <input type="text" id="newCatRu" placeholder="Название (RU) - например: Салаты" required>
-            <input type="text" id="newCatEn" placeholder="Name (EN) - например: Salads" required>
-            <input type="text" id="newCatKz" placeholder="Атауы (KZ) - например: Салаттар" required>
+        <div class="dish-form"> <input type="text" id="newCatRu" placeholder="Название (RU)">
+            <input type="text" id="newCatEn" placeholder="Name (EN)">
+            <input type="text" id="newCatKz" placeholder="Атауы (KZ)">
+            <button type="button" id="saveCatBtn" class="btn-publish">Создать категорию</button>
         </div>
-        <button type="button" id="saveCatBtn">Создать категорию</button>
     </div>
 
     <div class="admin-category-list-box">
         <h4>Текущие категории</h4>
-        <div id="adminCategoryList">
-            Загрузка...
-        </div>
+        <div id="adminCategoryList"></div>
     </div>
 
     <main class="admin-container">
         <section class="add-dish-section">
             <h2>Добавить новое блюдо</h2>
-            <form id="addDishForm">
-                <input type="text" id="dishNameRu" placeholder="Название (RU)" required>
+            <form id="addDishForm" class="dish-form"> <input type="text" id="dishNameRu" placeholder="Название (RU)"
+                    required>
                 <input type="text" id="dishNameEn" placeholder="Name (EN)" required>
                 <input type="text" id="dishNameKz" placeholder="Атауы (KZ)" required>
-
-                <div class="form-group">
-                    <textarea id="dishDescRu" placeholder="Описание (RU)"></textarea>
-                    <textarea id="dishDescEn" placeholder="Description (EN)"></textarea>
-                    <textarea id="dishDescKz" placeholder="Сипаттамасы (KZ)"></textarea>
-                </div>
-
+                <textarea id="dishDescRu" placeholder="Описание (RU)"></textarea>
+                <textarea id="dishDescEn" placeholder="Description (EN)"></textarea>
+                <textarea id="dishDescKz" placeholder="Сипаттамасы (KZ)"></textarea>
                 <input type="number" id="dishPrice" placeholder="Цена (₸)" required>
-                <div class="form-group">
-                    <label for="dishImgFile">Фото блюда (выберите из галереи):</label>
-                    <input type="file" id="dishImgFile" accept="image/*" required>
 
-                    <div id="previewContainer" style="margin-top: 10px; display: none;">
-                        <p style="font-size: 0.8rem; color: #666;">Предпросмотр:</p>
-                        <img id="imgPreview" src="" alt="Превью"
-                            style="max-width: 150px; border-radius: 8px; border: 1px solid #ddd;">
-                    </div>
+                <div class="file-input-wrapper">
+                    <label for="dishImgFile">Фото блюда:</label>
+                    <input type="file" id="dishImgFile" accept="image/*" required>
                 </div>
 
                 <select id="dishCategory" required>
                     <option value="" disabled selected>Загрузка категорий...</option>
                 </select>
-
-                <button type="submit" id="saveBtn">Опубликовать в меню</button>
+                <button type="submit" id="saveBtn" class="btn-publish">Опубликовать в меню</button>
             </form>
         </section>
 
-        <hr>
-
         <section class="manage-dishes">
             <h2>Текущее меню</h2>
-            <div id="adminDishList">
+            <div class="filter-container">
+                <button class="filter-btn active" data-category="all">Все</button>
+                <div id="dynamicFilters" class="dynamic-filters-box"></div>
             </div>
+            <div id="adminDishList"></div>
         </section>
     </main>
 
