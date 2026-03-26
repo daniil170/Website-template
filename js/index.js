@@ -21,6 +21,7 @@ const db = getFirestore(app);
 
 let cart = [];
 let currentLang = localStorage.getItem("selectedLanguage") || "ru";
+let menuAbortController = null;
 
 const translations = {
   ru: {
@@ -59,24 +60,99 @@ const translations = {
 
 window.toggleCart = function () {
   const modal = document.getElementById("cart-modal");
+  const cartNav = document.getElementById("cart-nav");
+
   if (modal) {
     const isVisible = modal.style.display === "block";
-    modal.style.display = isVisible ? "none" : "block";
-    document.body.style.overflow = isVisible ? "" : "hidden";
+
+    if (isVisible) {
+      // ЗАКРЫВАЕМ КОРЗИНУ
+      modal.style.display = "none";
+      document.body.style.overflow = "";
+      // Возвращаем плавающую кнопку, если в корзине есть товары
+      if (cart.length > 0 && cartNav) {
+        cartNav.classList.remove("hidden");
+      }
+    } else {
+      // ОТКРЫВАЕМ КОРЗИНУ
+      modal.style.display = "block";
+      document.body.style.overflow = "hidden";
+      // Скрываем плавающую кнопку, чтобы она не мешала просмотру состава заказа
+      if (cartNav) {
+        cartNav.classList.add("hidden");
+      }
+    }
   }
 };
 
-window.addToCart = function (name, price) {
+window.addToCart = function (name, price, event) {
   const existingItem = cart.find((item) => item.name === name);
   if (existingItem) {
     existingItem.quantity += 1;
   } else {
     cart.push({ name, price, quantity: 1 });
   }
+
   updateCartUI();
+
+  if (event && event.target) {
+    const dishCard = event.target.closest(".dish");
+    const imgToFly = dishCard?.querySelector(".dish-img");
+    if (imgToFly) {
+      animateFly(imgToFly);
+    }
+  }
+
   const cartNav = document.getElementById("cart-nav");
-  if (cartNav) cartNav.classList.remove("hidden");
+  const modal = document.getElementById("cart-modal");
+  const isModalOpen = modal && modal.style.display === "block";
+
+  // Показываем кнопку и делаем "bump" только если модалка сейчас закрыта
+  if (cartNav && !isModalOpen) {
+    cartNav.classList.remove("hidden");
+    setTimeout(() => {
+      cartNav.classList.remove("cart-bump");
+      void cartNav.offsetWidth;
+      cartNav.classList.add("cart-bump");
+    }, 700);
+  }
 };
+
+function animateFly(originImg) {
+  const cartNav = document.getElementById("cart-nav");
+  if (!cartNav) return;
+
+  const flyImg = originImg.cloneNode(true);
+  const rect = originImg.getBoundingClientRect();
+  const cartRect = cartNav.getBoundingClientRect();
+
+  flyImg.classList.add("fly-item");
+  flyImg.style.position = "fixed";
+  flyImg.style.top = `${rect.top}px`;
+  flyImg.style.left = `${rect.left}px`;
+  flyImg.style.width = `${rect.width}px`;
+  flyImg.style.height = `${rect.height}px`;
+  flyImg.style.zIndex = "10001";
+
+  document.body.appendChild(flyImg);
+
+  requestAnimationFrame(() => {
+    const targetX = cartRect.left + cartRect.width / 2;
+    const targetY = cartRect.top + cartRect.height / 2;
+
+    flyImg.style.top = `${targetY}px`;
+    flyImg.style.left = `${targetX}px`;
+    flyImg.style.width = `40px`;
+    flyImg.style.height = `40px`;
+    flyImg.style.borderRadius = `50%`;
+    flyImg.style.opacity = `0.2`;
+    flyImg.style.transform = `translate(-50%, -50%) rotate(720deg) scale(0.1)`;
+  });
+
+  setTimeout(() => {
+    flyImg.remove();
+  }, 900);
+}
 
 window.changeQuantity = function (index, delta) {
   if (!cart[index]) return;
@@ -90,15 +166,30 @@ window.changeQuantity = function (index, delta) {
 function updateCartUI() {
   const langData = translations[currentLang];
   const itemsList = document.getElementById("cart-items-list");
+  const cartNav = document.getElementById("cart-nav");
+  const modal = document.getElementById("cart-modal");
+  const isModalOpen = modal && modal.style.display === "block";
+
   if (!itemsList) return;
 
   if (cart.length === 0) {
     itemsList.innerHTML = `<p style="text-align:center; padding:20px; color:#888;">Корзина пуста / Empty</p>`;
-    document.getElementById("cart-nav")?.classList.add("hidden");
-    const modal = document.getElementById("cart-modal");
-    if (modal) modal.style.display = "none";
-    document.body.style.overflow = "";
+    if (cartNav) cartNav.classList.add("hidden");
+    // Если корзина стала пустой (удалили последний товар), закрываем модалку
+    if (isModalOpen) {
+      modal.style.display = "none";
+      document.body.style.overflow = "";
+    }
     return;
+  }
+
+  // Показываем кнопку только если модалка закрыта
+  if (cartNav) {
+    if (isModalOpen) {
+      cartNav.classList.add("hidden");
+    } else {
+      cartNav.classList.remove("hidden");
+    }
   }
 
   const subtotal = cart.reduce(
@@ -148,6 +239,10 @@ function updateCartUI() {
 // --- ЛОГИКА МЕНЮ ---
 
 async function initDynamicMenu() {
+  if (menuAbortController) menuAbortController.abort();
+  menuAbortController = new AbortController();
+  const signal = menuAbortController.signal;
+
   const nav = document.getElementById("dynamic-nav");
   const container = document.getElementById("menu-container");
   if (!nav || !container) return;
@@ -159,9 +254,10 @@ async function initDynamicMenu() {
     const catSnapshot = await getDocs(
       collection(db, "restaurants", "lumiere", "categories"),
     );
+    if (signal.aborted) return;
 
-    // Используем for...of для последовательной загрузки, чтобы избежать багов с порядком
     for (const catDoc of catSnapshot.docs) {
+      if (signal.aborted) break;
       const cat = catDoc.data();
       const id = catDoc.id;
       const name =
@@ -181,26 +277,28 @@ async function initDynamicMenu() {
       section.innerHTML = `<h2 class="category-title">${name}</h2><div class="dishes" id="list-${id}"></div>`;
       container.appendChild(section);
 
-      await renderDishes(ruName, `list-${id}`);
+      await renderDishes(ruName, `list-${id}`, signal);
     }
   } catch (e) {
-    console.error("Firebase Error:", e);
+    if (e.name !== "AbortError") console.error("Firebase Error:", e);
   }
 }
 
-async function renderDishes(categoryRuName, listId) {
+async function renderDishes(categoryRuName, listId, signal) {
   const listContainer = document.getElementById(listId);
   if (!listContainer) return;
-
-  listContainer.innerHTML = ""; // ОЧИЩАЕМ перед рендером, чтобы не было дублей
 
   const q = query(
     collection(db, "restaurants", "lumiere", "dishes"),
     where("category", "==", categoryRuName),
   );
   const querySnapshot = await getDocs(q);
+  if (signal && signal.aborted) return;
+
+  listContainer.innerHTML = "";
 
   querySnapshot.forEach((doc, index) => {
+    if (signal && signal.aborted) return;
     const d = doc.data();
     const dName =
       typeof d.name === "object" ? d.name[currentLang] || d.name["ru"] : d.name;
@@ -226,10 +324,12 @@ async function renderDishes(categoryRuName, listId) {
         <p class="dish-desc">${dDesc}</p>
         <span class="dish-price">${dPrice} ₸</span>
       </div>
-      <button class="add-btn" onclick="addToCart('${dName.replace(/'/g, "\\'")}', ${dPrice})">+</button>
+      <button class="add-btn" onclick="addToCart('${dName.replace(/'/g, "\\'")}', ${dPrice}, event)">+</button>
     `;
     listContainer.appendChild(el);
-    setTimeout(() => el.classList.add("visible", "show"), index * 100);
+    setTimeout(() => {
+      if (!signal.aborted) el.classList.add("show");
+    }, index * 80);
   });
 }
 
@@ -258,14 +358,12 @@ document.addEventListener("click", (e) => {
     localStorage.setItem("selectedLanguage", currentLang);
     applyTranslations();
     updateCartUI();
-    initDynamicMenu(); // Перерисовываем меню на новом языке
-
+    initDynamicMenu();
     document
       .querySelectorAll(".lang-btn")
       .forEach((btn) =>
         btn.classList.toggle("active", btn.dataset.lang === currentLang),
       );
-
     const overlay = document.getElementById("welcomeOverlay");
     if (overlay) overlay.style.display = "none";
     sessionStorage.setItem("welcomeShown", "true");
