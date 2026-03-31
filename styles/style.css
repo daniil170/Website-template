@@ -438,7 +438,7 @@ p {
 }
 
 .hidden {
-    display: none !important;
+  display: none !important;
 }
 
 .cart-nav:active {
@@ -669,6 +669,108 @@ p {
   position: relative; /* Возвращаем на место */
 }
 
+/* Кнопка-колокольчик */
+.waiter-fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 60px;
+  height: 60px;
+  background: #e67e22;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  z-index: 1000;
+  font-size: 28px;
+}
+
+/* Оверлей (фон) модалки */
+.modal-overlay {
+  display: none; /* Скрыто по умолчанию */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4); /* Полупрозрачный темный фон */
+  backdrop-filter: blur(8px); /* Тот самый эффект размытия для минимализма */
+  z-index: 2000;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Заголовок */
+#w-modal-title {
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 1.2rem;
+  color: #2c3e50;
+  margin-bottom: 8px;
+}
+
+.table-info {
+  text-align: center;
+  width: 100%;
+  font-size: 0.9rem;
+  color: #95a5a6; /* Ненавязчивый серый */
+  margin-bottom: 30px;
+  letter-spacing: 1px;
+}
+
+/* Сетка кнопок */
+.options-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Сами кнопки — СТИЛЬ МИНИМАЛИЗМ */
+.options-grid button {
+  padding: 16px;
+  border: none;
+  border-radius: 16px;
+  background: #f8f9fa; /* Светлый пастельный фон */
+  color: #34495e;
+  font-size: 15px;
+  font-weight: 500;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+/* Эффект при нажатии/наведении */
+.options-grid button:active,
+.options-grid button:hover {
+  background: #f0f0f0;
+  transform: scale(0.97); /* Легкое нажатие */
+}
+
+/* Акцентная кнопка (например, первая или "Нужен счет") */
+#w-opt-bill {
+  background: #fff3e0; /* Очень нежный оранжевый оттенок */
+  color: #e67e22;
+}
+
+/* Кнопка закрытия */
+.close-modal {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  color: #bdc3c7;
+  font-size: 20px;
+  transition: 0.2s;
+}
+
+.close-modal:hover {
+  color: #2c3e50;
+}
+
 /* --- АДАПТИВНОСТЬ (MEDIA QUERIES) --- */
 
 /* Для мобильных устройств (ширина экрана до 600px) */
@@ -757,5 +859,59 @@ p {
     -webkit-box-orient: vertical;
     overflow: hidden;
     font-size: 12px;
+  }
+}
+
+/* Адаптация под мобильные устройства (до 480px) */
+@media (max-width: 480px) {
+  /* Фон делаем чуть темнее для акцента */
+  .modal-overlay {
+    align-items: flex-end; /* Прижимаем окно к низу экрана */
+  }
+
+  .modal-content {
+    width: 100%; /* Растягиваем на всю ширину */
+    max-width: none;
+    border-radius: 32px 32px 0 0; /* Скругляем только верхние углы */
+    padding: 40px 20px 30px 20px; /* Увеличиваем нижний отступ для удобства */
+    margin-bottom: 0;
+    transform: translateY(0); /* Сброс лишних сдвигов */
+    animation: slide-up 0.4s cubic-bezier(0.25, 1, 0.5, 1); /* Плавный выезд снизу */
+  }
+
+  /* Делаем кнопки в сетке чуть крупнее для удобного нажатия пальцем */
+  .options-grid button {
+    padding: 18px;
+    font-size: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); /* Легкая тень для объема */
+  }
+
+  /* Полоска сверху модалки (имитация «ручки» для закрытия, как в iOS/Android) */
+  .modal-content::before {
+    content: "";
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    background: #e0e0e0;
+    border-radius: 2px;
+  }
+
+  /* Кнопку закрытия (крестик) на мобилках можно сделать менее акцентной или сдвинуть */
+  .close-modal {
+    top: 15px;
+    right: 20px;
+  }
+}
+
+/* Анимация появления снизу */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
   }
 }

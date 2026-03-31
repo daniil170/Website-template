@@ -87,6 +87,34 @@
         </div>
     </div>
 
+    <div class="waiter-fab" onclick="openWaiterModal()">
+        <span class="bell-icon">🔔</span>
+    </div>
+
+    <div id="waiterModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeWaiterModal()">&times;</span>
+            <h3 id="w-modal-title">Чем мы можем помочь?</h3>
+            <p class="table-info">Столик №<span id="displayTableNumber">...</span></p>
+
+            <div id="waiter-main-options" class="options-grid">
+                <button id="w-opt-bill" onclick="showPaymentOptions()"></button> <button id="w-opt-order"
+                    onclick="sendRequest('order')"></button>
+                <button id="w-opt-problem" onclick="sendRequest('problem')"></button>
+                <button id="w-opt-cleanup" onclick="sendRequest('cleanup')"></button>
+            </div>
+
+            <div id="payment-options" class="options-grid" style="display: none; margin-top: 10px;">
+                <p id="w-pay-title" style="grid-column: 1/-1; font-weight: bold;"></p>
+                <button onclick="sendRequest('bill_kaspi')" id="w-pay-kaspi"></button>
+                <button onclick="sendRequest('bill_card')" id="w-pay-card"></button>
+                <button onclick="sendRequest('bill_cash')" id="w-pay-cash"></button>
+                <button onclick="backToWaiterMain()"
+                    style="grid-column: 1/-1; background: #eee; color: #333;">Назад</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="js/index.js"></script>
 </body>
 
