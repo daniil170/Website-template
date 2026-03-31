@@ -69,7 +69,7 @@ const translations = {
       problem: "I need assistance ❓",
       cleanup: "Clean the table 🍽️",
       payKaspi: "Kaspi QR 🇰🇿",
-      payCard: "By Card 💳",
+      payCard: "By Card 2011",
       payCash: "Cash 💵",
       back: "Back",
       success: "Request sent! Waiter is coming.",
@@ -106,9 +106,7 @@ const translations = {
 
 window.openWaiterModal = function () {
   document.getElementById("waiterModal").style.display = "flex";
-  // Сбрасываем вид на главные опции при каждом открытии
   window.backToWaiterMain();
-
   const urlParams = new URLSearchParams(window.location.search);
   const tableNum = urlParams.get("table") || "Не указан";
   document.getElementById("displayTableNumber").innerText = tableNum;
@@ -118,14 +116,12 @@ window.closeWaiterModal = function () {
   document.getElementById("waiterModal").style.display = "none";
 };
 
-// Переключение на выбор оплаты
 window.showPaymentOptions = function () {
   document.getElementById("waiter-main-options").style.display = "none";
   document.getElementById("payment-options").style.display = "grid";
   applyTranslations();
 };
 
-// Возврат к главным кнопкам
 window.backToWaiterMain = function () {
   const mainOpts = document.getElementById("waiter-main-options");
   const payOpts = document.getElementById("payment-options");
@@ -138,7 +134,6 @@ window.sendRequest = async function (type) {
   const urlParams = new URLSearchParams(window.location.search);
   const tableNumber = urlParams.get("table") || "Не указан";
 
-  // Логика расчета суммы из корзины для уведомления
   const subtotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0,
@@ -185,7 +180,7 @@ window.sendRequest = async function (type) {
   }
 };
 
-// --- КОРЗИНА И МЕНЮ ---
+// --- КОРЗИНА ---
 
 window.toggleCart = function () {
   const modal = document.getElementById("cart-modal");
@@ -268,6 +263,7 @@ function updateCartUI() {
   const cartNav = document.getElementById("cart-nav");
   const modal = document.getElementById("cart-modal");
   if (!itemsList) return;
+
   if (cart.length === 0) {
     itemsList.innerHTML = `<p style="text-align:center; padding:20px; color:#888;">Корзина пуста / Empty</p>`;
     if (cartNav) cartNav.classList.add("hidden");
@@ -277,6 +273,7 @@ function updateCartUI() {
     }
     return;
   }
+
   const subtotal = cart.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0,
@@ -284,10 +281,12 @@ function updateCartUI() {
   const serviceCharge = Math.round(subtotal * 0.1);
   const finalTotal = subtotal + serviceCharge;
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+
   if (document.getElementById("cart-count"))
     document.getElementById("cart-count").innerText = totalItems;
   if (document.getElementById("cart-total"))
     document.getElementById("cart-total").innerText = `${finalTotal} ₸`;
+
   let html = cart
     .map(
       (item, index) => `
@@ -305,6 +304,7 @@ function updateCartUI() {
   `,
     )
     .join("");
+
   html += `
     <div class="cart-summary-details">
       <div class="summary-line"><span>${langData.total}</span><span>${subtotal} ₸</span></div>
@@ -315,18 +315,27 @@ function updateCartUI() {
   itemsList.innerHTML = html;
 }
 
+// --- ДИНАМИЧЕСКОЕ МЕНЮ ---
+
 async function initDynamicMenu() {
   if (menuAbortController) menuAbortController.abort();
   menuAbortController = new AbortController();
+  const signal = menuAbortController.signal;
+
   const nav = document.getElementById("dynamic-nav");
   const container = document.getElementById("menu-container");
   if (!nav || !container) return;
+
+  // Очищаем, чтобы не было дублей при смене языка
   nav.innerHTML = "";
   container.innerHTML = "";
+
   try {
     const catSnapshot = await getDocs(
       collection(db, "restaurants", "lumiere", "categories"),
     );
+    if (signal.aborted) return;
+
     for (const catDoc of catSnapshot.docs) {
       const cat = catDoc.data();
       const id = catDoc.id;
@@ -335,16 +344,19 @@ async function initDynamicMenu() {
           ? cat.name[currentLang] || cat.name["ru"]
           : cat.name;
       const ruName = typeof cat.name === "object" ? cat.name["ru"] : cat.name;
+
       const link = document.createElement("a");
       link.href = `#${id}`;
       link.textContent = name;
       nav.appendChild(link);
+
       const section = document.createElement("section");
       section.id = id;
       section.className = "menu-category show";
       section.innerHTML = `<h2 class="category-title">${name}</h2><div class="dishes" id="list-${id}"></div>`;
       container.appendChild(section);
-      await renderDishes(ruName, `list-${id}`, menuAbortController.signal);
+
+      await renderDishes(ruName, `list-${id}`, signal);
     }
   } catch (e) {
     if (e.name !== "AbortError") console.error(e);
@@ -353,13 +365,18 @@ async function initDynamicMenu() {
 
 async function renderDishes(categoryRuName, listId, signal) {
   const listContainer = document.getElementById(listId);
+  if (!listContainer) return;
+
   const q = query(
     collection(db, "restaurants", "lumiere", "dishes"),
     where("category", "==", categoryRuName),
   );
+
   const querySnapshot = await getDocs(q);
   if (signal?.aborted) return;
-  listContainer.innerHTML = "";
+
+  listContainer.innerHTML = ""; // Очистка перед отрисовкой блюд
+
   querySnapshot.forEach((doc, index) => {
     const d = doc.data();
     const dName =
@@ -368,6 +385,7 @@ async function renderDishes(categoryRuName, listId, signal) {
       typeof d.description === "object"
         ? d.description[currentLang] || d.description["ru"]
         : d.description;
+
     const el = document.createElement("div");
     el.className = "dish";
     el.innerHTML = `
@@ -383,7 +401,9 @@ async function renderDishes(categoryRuName, listId, signal) {
       <button class="add-btn" onclick="addToCart('${dName.replace(/'/g, "\\'")}', ${d.price || 0}, event)">+</button>
     `;
     listContainer.appendChild(el);
-    setTimeout(() => el.classList.add("show"), index * 80);
+    setTimeout(() => {
+      if (!signal.aborted) el.classList.add("show");
+    }, index * 60);
   });
 }
 
@@ -410,7 +430,6 @@ function applyTranslations() {
     "#w-opt-order": w.order,
     "#w-opt-problem": w.problem,
     "#w-opt-cleanup": w.cleanup,
-    // Новые элементы оплаты
     "#w-pay-title": w.choosePayment,
     "#w-pay-kaspi": w.payKaspi,
     "#w-pay-card": w.payCard,
@@ -427,16 +446,23 @@ function applyTranslations() {
 
 document.addEventListener("click", (e) => {
   if (e.target.classList.contains("lang-btn")) {
-    currentLang = e.target.dataset.lang;
+    const selected = e.target.dataset.lang;
+    if (selected === currentLang && sessionStorage.getItem("welcomeShown"))
+      return;
+
+    currentLang = selected;
     localStorage.setItem("selectedLanguage", currentLang);
+
     applyTranslations();
     updateCartUI();
     initDynamicMenu();
+
     document
       .querySelectorAll(".lang-btn")
       .forEach((btn) =>
         btn.classList.toggle("active", btn.dataset.lang === currentLang),
       );
+
     const overlay = document.getElementById("welcomeOverlay");
     if (overlay) overlay.style.display = "none";
     sessionStorage.setItem("welcomeShown", "true");
