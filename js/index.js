@@ -19,10 +19,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// --- НАСТРОЙКИ TELEGRAM ---
-const TG_TOKEN = "8337333709:AAEwr9ynFU8sFaIRuUy0uF8wfCIF9gU47xQ";
-const TG_CHAT_ID = "-1003713159060";
-
 let cart = [];
 let currentLang = localStorage.getItem("selectedLanguage") || "ru";
 let menuAbortController = null;
@@ -37,20 +33,6 @@ const translations = {
     totalWithService: "Итого к оплате:",
     instruction: "Покажите этот экран официанту для подтверждения заказа",
     footer: { address: "Алматы, Казахстан", copy: "© 2026 Lumiere" },
-    waiter: {
-      modalTitle: "Чем мы можем помочь?",
-      choosePayment: "Выберите способ оплаты:",
-      bill: "Нужен счет 💳",
-      order: "Сделать дозаказ 📝",
-      problem: "Подойдите, пожалуйста ❓",
-      cleanup: "Уберите со стола 🍽️",
-      payKaspi: "Kaspi QR 🇰🇿",
-      payCard: "Картой 💳",
-      payCash: "Наличными 💵",
-      back: "Назад",
-      success: "Запрос отправлен! Официант скоро будет.",
-      error: "Ошибка отправки. Попробуйте еще раз.",
-    },
   },
   en: {
     subtitle: "Modern Italian Kitchen",
@@ -61,20 +43,6 @@ const translations = {
     totalWithService: "Total to pay:",
     instruction: "Show this screen to the waiter to confirm your order",
     footer: { address: "Almaty, Kazakhstan", copy: "© 2026 Lumiere" },
-    waiter: {
-      modalTitle: "How can we help you?",
-      choosePayment: "Select payment method:",
-      bill: "Bring the bill 💳",
-      order: "Order more 📝",
-      problem: "I need assistance ❓",
-      cleanup: "Clean the table 🍽️",
-      payKaspi: "Kaspi QR 🇰🇿",
-      payCard: "By Card 2011",
-      payCash: "Cash 💵",
-      back: "Back",
-      success: "Request sent! Waiter is coming.",
-      error: "Error. Please try again.",
-    },
   },
   kz: {
     subtitle: "Заманауи итальян асханасы",
@@ -85,99 +53,7 @@ const translations = {
     totalWithService: "Төлеуге:",
     instruction: "Тапсырысты растау үшін осы экранды даяшыға көрсетіңіз",
     footer: { address: "Алматы, Қазақстан", copy: "© 2026 Lumiere" },
-    waiter: {
-      modalTitle: "Сізге қалай көмектесе аламыз?",
-      choosePayment: "Төлем түрін таңдаңыз:",
-      bill: "Шот әкеліңіз 💳",
-      order: "Тағы тапсырыс беру 📝",
-      problem: "Көмек керек ❓",
-      cleanup: "Үстелді жинау 🍽️",
-      payKaspi: "Kaspi QR 🇰🇿",
-      payCard: "Картамен 💳",
-      payCash: "Қолма-қол 💵",
-      back: "Артқа",
-      success: "Сұраныс жіберілді! Даяшы келе жатыр.",
-      error: "Қате кетті. Қайта байқап көріңіз.",
-    },
   },
-};
-
-// --- ФУНКЦИИ ВЫЗОВА ОФИЦИАНТА ---
-
-window.openWaiterModal = function () {
-  document.getElementById("waiterModal").style.display = "flex";
-  window.backToWaiterMain();
-  const urlParams = new URLSearchParams(window.location.search);
-  const tableNum = urlParams.get("table") || "Не указан";
-  document.getElementById("displayTableNumber").innerText = tableNum;
-};
-
-window.closeWaiterModal = function () {
-  document.getElementById("waiterModal").style.display = "none";
-};
-
-window.showPaymentOptions = function () {
-  document.getElementById("waiter-main-options").style.display = "none";
-  document.getElementById("payment-options").style.display = "grid";
-  applyTranslations();
-};
-
-window.backToWaiterMain = function () {
-  const mainOpts = document.getElementById("waiter-main-options");
-  const payOpts = document.getElementById("payment-options");
-  if (mainOpts) mainOpts.style.display = "grid";
-  if (payOpts) payOpts.style.display = "none";
-};
-
-window.sendRequest = async function (type) {
-  const langData = translations[currentLang].waiter;
-  const urlParams = new URLSearchParams(window.location.search);
-  const tableNumber = urlParams.get("table") || "Не указан";
-
-  const subtotal = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0,
-  );
-  const totalWithService = subtotal > 0 ? Math.round(subtotal * 1.1) : 0;
-  const amountText =
-    totalWithService > 0
-      ? `\n💰 Сумма к оплате: <b>${totalWithService} ₸</b>`
-      : "";
-
-  const reasons = {
-    bill_kaspi: "Счет: Kaspi QR 🇰🇿",
-    bill_card: "Счет: Банковская карта 💳",
-    bill_cash: "Счет: Наличные 💵",
-    order: "Хочет сделать дозаказ 📝",
-    problem: "Нужна помощь / Вопрос ❓",
-    cleanup: "Убрать со стола 🍽️",
-  };
-
-  const text = `🔔 <b>ВЫЗОВ ОФИЦИАНТА</b>\n\n📍 Столик: <b>№${tableNumber}</b>\n💬 Цель: <b>${reasons[type] || type}</b>${amountText}\n⏰ Время: ${new Date().toLocaleTimeString()}`;
-
-  try {
-    const response = await fetch(
-      `https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: TG_CHAT_ID,
-          text: text,
-          parse_mode: "HTML",
-        }),
-      },
-    );
-
-    if (response.ok) {
-      alert(langData.success);
-      closeWaiterModal();
-    } else {
-      alert(langData.error);
-    }
-  } catch (e) {
-    alert("Проверьте интернет-соединение.");
-  }
 };
 
 // --- КОРЗИНА ---
@@ -207,11 +83,13 @@ window.addToCart = function (name, price, event) {
     cart.push({ name, price, quantity: 1 });
   }
   updateCartUI();
+
   if (event && event.target) {
     const dishCard = event.target.closest(".dish");
     const imgToFly = dishCard?.querySelector(".dish-img");
     if (imgToFly) animateFly(imgToFly);
   }
+
   const cartNav = document.getElementById("cart-nav");
   const modal = document.getElementById("cart-modal");
   if (cartNav && (!modal || modal.style.display !== "block")) {
@@ -228,6 +106,7 @@ function animateFly(originImg) {
   const flyImg = originImg.cloneNode(true);
   const rect = originImg.getBoundingClientRect();
   const cartRect = cartNav.getBoundingClientRect();
+
   flyImg.classList.add("fly-item");
   flyImg.style.position = "fixed";
   flyImg.style.top = `${rect.top}px`;
@@ -235,7 +114,9 @@ function animateFly(originImg) {
   flyImg.style.width = `${rect.width}px`;
   flyImg.style.height = `${rect.height}px`;
   flyImg.style.zIndex = "10001";
+
   document.body.appendChild(flyImg);
+
   requestAnimationFrame(() => {
     const targetX = cartRect.left + cartRect.width / 2;
     const targetY = cartRect.top + cartRect.height / 2;
@@ -247,6 +128,7 @@ function animateFly(originImg) {
     flyImg.style.opacity = `0.2`;
     flyImg.style.transform = `translate(-50%, -50%) rotate(720deg) scale(0.1)`;
   });
+
   setTimeout(() => flyImg.remove(), 900);
 }
 
@@ -326,7 +208,7 @@ async function initDynamicMenu() {
   const container = document.getElementById("menu-container");
   if (!nav || !container) return;
 
-  // Очищаем, чтобы не было дублей при смене языка
+  // Чистим перед рендером, чтобы не было дублей
   nav.innerHTML = "";
   container.innerHTML = "";
 
@@ -337,6 +219,7 @@ async function initDynamicMenu() {
     if (signal.aborted) return;
 
     for (const catDoc of catSnapshot.docs) {
+      if (signal.aborted) return;
       const cat = catDoc.data();
       const id = catDoc.id;
       const name =
@@ -359,7 +242,7 @@ async function initDynamicMenu() {
       await renderDishes(ruName, `list-${id}`, signal);
     }
   } catch (e) {
-    if (e.name !== "AbortError") console.error(e);
+    if (e.name !== "AbortError") console.error("Menu Error:", e);
   }
 }
 
@@ -375,9 +258,10 @@ async function renderDishes(categoryRuName, listId, signal) {
   const querySnapshot = await getDocs(q);
   if (signal?.aborted) return;
 
-  listContainer.innerHTML = ""; // Очистка перед отрисовкой блюд
+  listContainer.innerHTML = "";
 
   querySnapshot.forEach((doc, index) => {
+    if (signal?.aborted) return;
     const d = doc.data();
     const dName =
       typeof d.name === "object" ? d.name[currentLang] || d.name["ru"] : d.name;
@@ -422,24 +306,14 @@ function applyTranslations() {
     const el = document.querySelector(s);
     if (el) el.textContent = mapping[s];
   }
+}
 
-  const w = data.waiter;
-  const wMapping = {
-    "#w-modal-title": w.modalTitle,
-    "#w-opt-bill": w.bill,
-    "#w-opt-order": w.order,
-    "#w-opt-problem": w.problem,
-    "#w-opt-cleanup": w.cleanup,
-    "#w-pay-title": w.choosePayment,
-    "#w-pay-kaspi": w.payKaspi,
-    "#w-pay-card": w.payCard,
-    "#w-pay-cash": w.payCash,
-    "#w-pay-back": w.back,
-  };
-  for (let s in wMapping) {
-    const el = document.querySelector(s);
-    if (el) el.innerText = wMapping[s];
-  }
+// --- ИНИЦИАЛИЗАЦИЯ ЯЗЫКОВЫХ КНОПОК ---
+
+function updateLangButtonsUI() {
+  document.querySelectorAll(".lang-btn").forEach((btn) => {
+    btn.classList.toggle("active", btn.dataset.lang === currentLang);
+  });
 }
 
 // --- ИНИЦИАЛИЗАЦИЯ ---
@@ -447,6 +321,8 @@ function applyTranslations() {
 document.addEventListener("click", (e) => {
   if (e.target.classList.contains("lang-btn")) {
     const selected = e.target.dataset.lang;
+
+    // Если язык тот же и окно уже было - игнорим
     if (selected === currentLang && sessionStorage.getItem("welcomeShown"))
       return;
 
@@ -456,12 +332,7 @@ document.addEventListener("click", (e) => {
     applyTranslations();
     updateCartUI();
     initDynamicMenu();
-
-    document
-      .querySelectorAll(".lang-btn")
-      .forEach((btn) =>
-        btn.classList.toggle("active", btn.dataset.lang === currentLang),
-      );
+    updateLangButtonsUI();
 
     const overlay = document.getElementById("welcomeOverlay");
     if (overlay) overlay.style.display = "none";
@@ -470,18 +341,19 @@ document.addEventListener("click", (e) => {
 });
 
 document.addEventListener("DOMContentLoaded", () => {
+  // Скрываем приветствие, если уже заходили
   if (sessionStorage.getItem("welcomeShown") === "true") {
     const overlay = document.getElementById("welcomeOverlay");
     if (overlay) overlay.style.display = "none";
   }
+
+  // Применяем визуальное состояние кнопок языка
+  updateLangButtonsUI();
+
   applyTranslations();
   initDynamicMenu();
   updateCartUI();
+
   const cartNav = document.getElementById("cart-nav");
   if (cartNav) cartNav.onclick = window.toggleCart;
 });
-
-window.onclick = function (event) {
-  const modal = document.getElementById("waiterModal");
-  if (event.target == modal) closeWaiterModal();
-};
